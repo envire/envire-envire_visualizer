@@ -1,0 +1,9 @@
+<package>
+  <description brief="template for 3d vizkit plugins">
+  </description>
+  <author>Sylvain Joyeux/sylvain.joyeux@dfki.de</author>
+  <license>GPLv2 or later</license>
+  <depend package="graphviz" />
+  <depend package="envire/envire_core" />
+  <depend package="gui/vizkit3d" />
+</package>
