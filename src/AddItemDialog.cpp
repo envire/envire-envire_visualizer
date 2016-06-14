@@ -18,7 +18,6 @@ AddItemDialog::AddItemDialog(QWidget* parent): QDialog(parent),
   //for now plugins are simply added manually. this might change later.
   addItemFactory(shared_ptr<ItemFactoryInterface>(new PclItemFactory()));
   
-  
   for(ItemFactoryHash::const_iterator it = itemFactories.begin();
       it != itemFactories.end(); ++it)
   {

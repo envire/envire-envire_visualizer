@@ -9,6 +9,7 @@ rock_library(envire_visualizer
                      AddTransformDialog.hpp
                      AddItemDialog.hpp
                      ItemTableModel.hpp
+                     ItemManipulatorWidget.hpp
              HEADERS Vizkit3dPluginInformation.hpp
                      Helpers.hpp
                      EnvireVisualizerWindow.hpp
@@ -19,6 +20,7 @@ rock_library(envire_visualizer
                      AddItemDialog.hpp
                      ItemTableModel.hpp
                      plugins/ItemFactoryInterface.hpp
+                     ItemManipulatorWidget.hpp
                      ${SOURCES_UI_H}
              SOURCES EnvireGraphVisualizer.cpp
                      Vizkit3dPluginInformation.cpp
@@ -28,6 +30,7 @@ rock_library(envire_visualizer
                      AddItemDialog.cpp
                      ItemTableModel.cpp
                      EnvireVisualizerWindow.cpp
+                     ItemManipulatorWidget.cpp
                      ${SOURCES_MOC}
                      #add ui files to create a dependency and regen if the ui changes
                      mainwindow.ui 

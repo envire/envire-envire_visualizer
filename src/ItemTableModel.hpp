@@ -22,6 +22,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     
+    envire::core::ItemBase::Ptr getItem(const QModelIndex& index) const;
+    
 private:
   std::vector<envire::core::ItemBase::Ptr> items;
   const int numColumns; //number of columns

@@ -111,4 +111,11 @@ QVariant ItemTableModel::headerData(int section, Qt::Orientation orientation, in
   return QVariant();
 }
 
+envire::core::ItemBase::Ptr ItemTableModel::getItem(const QModelIndex& index) const
+{
+  const int row = index.row();
+  assert(row < items.size());
+  return items[row];
+}
+
 }}

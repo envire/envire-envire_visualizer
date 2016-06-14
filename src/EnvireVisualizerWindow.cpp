@@ -14,6 +14,7 @@
 #include <glog/logging.h>
 #include <fstream>
 #include "envire_core/EnvireGraph2DStructurWidget.hpp"
+#include "ItemManipulatorWidget.hpp"
 
 using namespace envire::core;
 using vertex_descriptor = GraphTraits::vertex_descriptor;
@@ -28,6 +29,8 @@ firstTimeDisplayingItems(true)
   window->setupUi(this);
   view2D = new EnvireGraph2DStructurWidget();
   addItemDialog = new AddItemDialog(this);
+  itemManipulator = new ItemManipulatorWidget(this);
+  window->verticalLayout3DView->addWidget(itemManipulator);
   window->tabWidget->addTab(view2D, "2D View");
   
   window->treeView->setModel(&currentTransform);
@@ -51,9 +54,10 @@ firstTimeDisplayingItems(true)
   connect(window->actionAdd_Item, SIGNAL(activated(void)), this, SLOT(addItem()));
   connect(window->listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
-  
   connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
           this, SLOT(transformChanged(const envire::core::Transform&)));
+  connect(window->tableViewItems, SIGNAL(clicked(const QModelIndex&)), this,
+          SLOT(itemClicked(const QModelIndex&)));
   
   pluginInfos.reset(new Vizkit3dPluginInformation(window->Vizkit3DWidget));
   
@@ -443,6 +447,11 @@ void EnvireVisualizerWindow::addItem()
   addItemDialog->addItem(graph, selectedFrame);
 }
 
+void EnvireVisualizerWindow::itemClicked(const QModelIndex & index)
+{
+  ItemBase::Ptr item = currentItems.getItem(index);
+  itemManipulator->itemSelected(item, graph, visualzier->getTree());
+}
 
 
 }}

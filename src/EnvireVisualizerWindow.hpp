@@ -26,6 +26,7 @@ class EnvireGraphVisualizer;
 class Vizkit3dPluginInformation;
 class EnvireGraph2DStructurWidget;
 class AddItemDialog;
+class ItemManipulatorWidget;
 
 class EnvireVisualizerWindow : public QMainWindow, public envire::core::GraphEventDispatcher
 {
@@ -89,6 +90,9 @@ private slots:
   /**Display the items of @p frame in the itemListWidget */
   void displayItems(const QString& frame);
   
+  /**Invoked whenever the user clicks on an item */
+  void itemClicked(const QModelIndex & index);
+  
 private:
   
   /** @param finished if false, the movement is still ongoing, if true the movement is done */
@@ -107,6 +111,8 @@ private:
   bool firstTimeDisplayingItems; //true if no items have been displayed, yet
   EnvireGraph2DStructurWidget* view2D; //widget inside the "2D View" tab
   AddItemDialog* addItemDialog;
+  envire::core::ItemBase::Ptr selectedItem;
+  ItemManipulatorWidget* itemManipulator;
 };
   
   

@@ -19,8 +19,7 @@ public:
   
   /**Create a new item of @p type.
    * This method is called in the gui thread.
-   * When this method is called a QApplication exists. Thus it is safe to 
-   * popup a QDialog to ask for user input.
+   * When this method is called a QApplication exists.
    * @return a new instance of the requested type or nullptr if the type is
    *         not supported.*/
   virtual envire::core::ItemBase::Ptr createItem(const std::type_index& type,
