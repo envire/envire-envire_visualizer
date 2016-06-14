@@ -1,6 +1,11 @@
+
 rock_library(envire_visualizer_pcl_plugin 
-           #  MOC     EnvireVisualizerWindow.hpp
+             MOC     PclWidget.hpp
              HEADERS PclItemFactory.hpp
+                     PclWidget.hpp
              SOURCES PclItemFactory.cpp
-             DEPS envire_visualizer 
-             DEPS_PKGCONFIG envire_core base-lib)    
+             DEPS_PKGCONFIG envire_core
+                            envire_pcl
+                            base-lib
+                            pcl_common-1.7
+                            pcl_io-1.7)    

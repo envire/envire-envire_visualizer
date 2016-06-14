@@ -13,7 +13,7 @@ public:
   AddTransformDialog(QWidget* parent = nullptr);
   QString getFrameId() const;
   const envire::core::Transform& getTransform() const;
-  
+    
 private slots:
   void frameIdChanged(const QString& newId);
   

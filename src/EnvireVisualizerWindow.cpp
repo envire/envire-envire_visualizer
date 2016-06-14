@@ -6,14 +6,13 @@
 #include "Vizkit3dPluginInformation.hpp"
 #include "DoubleSpinboxItemDelegate.hpp"
 #include "AddTransformDialog.hpp"
+#include "AddItemDialog.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/EdgeEvents.hpp>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <glog/logging.h>
 #include <fstream>
-
-
 #include "envire_core/EnvireGraph2DStructurWidget.hpp"
 
 using namespace envire::core;
@@ -28,6 +27,7 @@ firstTimeDisplayingItems(true)
 {
   window->setupUi(this);
   view2D = new EnvireGraph2DStructurWidget();
+  addItemDialog = new AddItemDialog(this);
   window->tabWidget->addTab(view2D, "2D View");
   
   window->treeView->setModel(&currentTransform);
@@ -48,6 +48,7 @@ firstTimeDisplayingItems(true)
   connect(window->actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window->actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
   connect(window->actionSave_Graph, SIGNAL(activated(void)), this, SLOT(storeGraph()));
+  connect(window->actionAdd_Item, SIGNAL(activated(void)), this, SLOT(addItem()));
   connect(window->listWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   
@@ -430,6 +431,12 @@ void EnvireVisualizerWindow::frameMoving(const QString& frame, const QVector3D& 
 std::shared_ptr<EnvireGraph> EnvireVisualizerWindow::getGraph() const
 {
   return graph;
+}
+
+void EnvireVisualizerWindow::addItem()
+{
+  assert(!selectedFrame.isEmpty());
+  addItemDialog->addItem(graph, selectedFrame);
 }
 
 
