@@ -64,6 +64,7 @@ firstTimeDisplayingItems(true)
   window->actionAdd_Frame->setEnabled(false);
   window->actionRemove_Frame->setEnabled(false);
   window->actionSave_Graph->setEnabled(false);
+  window->actionAdd_Item->setEnabled(false);
 }
   
 void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
@@ -113,8 +114,9 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   window->listWidget->setEnabled(true);
   window->Vizkit3DWidget->setEnabled(true);
   window->actionAdd_Frame->setEnabled(true);
-  window->actionRemove_Frame->setEnabled(true);
+  window->actionRemove_Frame->setEnabled(false); //leave disabled because initially no frame is selected
   window->actionSave_Graph->setEnabled(true);
+  window->actionAdd_Item->setEnabled(false); //leave disabled because initially no frame is selected
   
   rootFrame = rootNode;
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
@@ -229,6 +231,8 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
       window->actionRemove_Frame->setEnabled(false);
     else
       window->actionRemove_Frame->setEnabled(true);
+    
+    window->actionAdd_Item->setEnabled(true);//is disabled if no frame was selected before
     
     window->Vizkit3DWidget->selectFrame(name, true);
     selectedFrame = name;
