@@ -15,7 +15,7 @@ ItemManipulatorWidget::ItemManipulatorWidget(QWidget* parent): QWidget(parent)
 {
   currentManipulatorWidget = nullptr;
   QVBoxLayout* mainLayout = new QVBoxLayout(this);
-  QGroupBox* groupBox = new QGroupBox(this);
+  groupBox = new QGroupBox(this);
   groupBox->setTitle("Item Manipulator");
   mainLayout->addWidget(groupBox);
   setLayout(mainLayout);
@@ -45,6 +45,7 @@ void ItemManipulatorWidget::itemSelected(envire::core::ItemBase::Ptr item,
     noItemSelected->hide();
     noManipulatorAvailable->hide();
     removeCurrentManipulatorWidget();
+    groupBox->setTitle("Item Manipulator");
       
     if(selectedItem)
     {
@@ -56,6 +57,9 @@ void ItemManipulatorWidget::itemSelected(envire::core::ItemBase::Ptr item,
         currentManipulatorWidget->setParent(this);
         layout->addWidget(currentManipulatorWidget);
         currentManipulatorWidget->show();
+        groupBox->setTitle(QString("Item Manipulator (") +
+                           QString::fromStdString(demangleTypeName(type)) + 
+                           QString(")"));
       }
       else
       {
@@ -71,6 +75,7 @@ void ItemManipulatorWidget::clearSelection()
   removeCurrentManipulatorWidget();
   noManipulatorAvailable->hide();
   noItemSelected->show();
+  groupBox->setTitle("Item Manipulator");
 }
 
 

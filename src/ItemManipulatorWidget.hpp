@@ -7,6 +7,7 @@
 
 class QVBoxLayout;
 class QLabel;
+class QGroupBox;
 
 namespace envire { namespace core {
   class EnvireGraph;
@@ -48,6 +49,7 @@ private:
   QLabel* noItemSelected;
   QLabel* noManipulatorAvailable;
   QWidget* currentManipulatorWidget;
+  QGroupBox* groupBox;
   using ManipulatorHash = std::unordered_map<std::type_index, std::shared_ptr<ItemManipulatorFactoryInterface>>;
   ManipulatorHash manipulators;
    
