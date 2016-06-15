@@ -31,6 +31,6 @@ const std::vector<std::type_index>& PclItemManipulatorFactory::getSupportedTypes
 PclItemManipulator::PclItemManipulator(QWidget* parent): QWidget(parent)
 {
   QHBoxLayout* layout = new QHBoxLayout(this);
-  layout->addWidget(new QLabel("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
+  layout->addWidget(new QLabel("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
   setLayout(layout);
 }

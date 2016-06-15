@@ -1,17 +1,33 @@
 #include "ItemManipulatorWidget.hpp"
-#include <envire_core/items/ItemBase.hpp>
-#include <QVBoxLayout>
 #include "ItemTableModel.hpp"
 #include "plugins/PclPlugin/PclManipulator.hpp"
 #include "plugins/ItemManipulatorFactoryInterface.hpp"
+#include <envire_core/items/ItemBase.hpp>
+#include <QVBoxLayout>
+#include <QGroupBox>
+#include <QLabel>
+
 
 using namespace envire::viz;
 using namespace envire::core;
 
 ItemManipulatorWidget::ItemManipulatorWidget(QWidget* parent): QWidget(parent)
 {
+  currentManipulatorWidget = nullptr;
+  QVBoxLayout* mainLayout = new QVBoxLayout(this);
+  QGroupBox* groupBox = new QGroupBox(this);
+  groupBox->setTitle("Item Manipulator");
+  mainLayout->addWidget(groupBox);
+  setLayout(mainLayout);
+  
   layout = new QVBoxLayout();
-  setLayout(layout);
+  groupBox->setLayout(layout);
+  
+  noItemSelected = new QLabel("No item Selected");
+  noManipulatorAvailable = new QLabel("No manipulator available for this item type");
+  layout->addWidget(noItemSelected);
+  layout->addWidget(noManipulatorAvailable);
+  noManipulatorAvailable->hide();
   
   //for now plugnis are hard coded, this may change later
   std::shared_ptr<ItemManipulatorFactoryInterface> factory(new PclItemManipulatorFactory());
@@ -23,34 +39,40 @@ void ItemManipulatorWidget::itemSelected(envire::core::ItemBase::Ptr item,
                                          std::shared_ptr<envire::core::EnvireGraph> graph,
                                          const envire::core::TreeView& tree)
 {
-  std::cout << "ITEM ITEM ITEM" << std::endl;
   if(item != selectedItem)
   {
     selectedItem = item;
-    clearLayout();
+    noItemSelected->hide();
+    noManipulatorAvailable->hide();
+    removeCurrentManipulatorWidget();
+      
     if(selectedItem)
     {
       const std::type_index type = item->getTypeIndex();
       if(manipulators.find(type) != manipulators.end())
       {
         const auto& factory = manipulators[type];
-        QWidget* widget = factory->create(item, graph, tree);
-        widget->setParent(this);
-        layout->addWidget(widget);
-        widget->show();
+        currentManipulatorWidget = factory->create(item, graph, tree);
+        currentManipulatorWidget->setParent(this);
+        layout->addWidget(currentManipulatorWidget);
+        currentManipulatorWidget->show();
+      }
+      else
+      {
+        noManipulatorAvailable->show();
       }
     }
   }
 }
 
-void ItemManipulatorWidget::clearLayout()
+void ItemManipulatorWidget::clearSelection()
 {
-  QLayoutItem *child;
-  while ((child = layout->takeAt(0)) != 0) 
-  {
-    delete child;
-  }
+  selectedItem.reset();
+  removeCurrentManipulatorWidget();
+  noManipulatorAvailable->hide();
+  noItemSelected->show();
 }
+
 
 void ItemManipulatorWidget::addItemManipulator(std::shared_ptr<ItemManipulatorFactoryInterface> manipulator)
 {
@@ -67,6 +89,16 @@ void ItemManipulatorWidget::addItemManipulator(std::shared_ptr<ItemManipulatorFa
     {
       manipulators[index] = manipulator;
     }
+  }
+}
+
+void ItemManipulatorWidget::removeCurrentManipulatorWidget()
+{
+  if(currentManipulatorWidget != nullptr)
+  {
+    layout->removeWidget(currentManipulatorWidget);
+    delete currentManipulatorWidget;
+    currentManipulatorWidget = nullptr;
   }
 }
 

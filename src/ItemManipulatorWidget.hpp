@@ -1,11 +1,12 @@
 #pragma once
 #include <QWidget>
-#include <QModelIndex>
-#include <QVBoxLayout>
 #include <unordered_map>
 #include <envire_core/items/ItemBase.hpp>
 #include <memory>
 #include <osgViz/plugins/Object.h>
+
+class QVBoxLayout;
+class QLabel;
 
 namespace envire { namespace core {
   class EnvireGraph;
@@ -33,14 +34,20 @@ public slots:
   void itemSelected(envire::core::ItemBase::Ptr item,
                     std::shared_ptr<envire::core::EnvireGraph> graph,
                     const envire::core::TreeView& tree); 
+  
+  /** */
+  void clearSelection();
+  
 private:
   
-  void clearLayout();
-  
+  void removeCurrentManipulatorWidget();
   void addItemManipulator(std::shared_ptr<ItemManipulatorFactoryInterface> manipulator);
   
   envire::core::ItemBase::Ptr selectedItem;
   QVBoxLayout* layout;
+  QLabel* noItemSelected;
+  QLabel* noManipulatorAvailable;
+  QWidget* currentManipulatorWidget;
   using ManipulatorHash = std::unordered_map<std::type_index, std::shared_ptr<ItemManipulatorFactoryInterface>>;
   ManipulatorHash manipulators;
    

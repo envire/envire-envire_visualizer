@@ -375,6 +375,7 @@ void EnvireVisualizerWindow::displayItems(const QString& frame)
 {
   const FrameId frameId = frame.toStdString();
   currentItems.clear();
+  itemManipulator->clearSelection();
   bool visited = false;//changed to true if at least one item is visited
   graph->visitItems(frameId, [this, &visited] (const ItemBase::Ptr item)
   {
