@@ -11,4 +11,5 @@ rock_library(envire_visualizer_pcl_plugin
                             envire_pcl
                             base-lib
                             pcl_common-1.7
-                            pcl_io-1.7)    
+                            pcl_io-1.7
+                            pcl_registration-1.7)    

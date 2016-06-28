@@ -32,10 +32,7 @@ void AddItemDialog::addItemFactory(shared_ptr<ItemFactoryInterface> factory)
     const QString type = QString::fromStdString(demangleTypeName(index));
     if(itemFactories.contains(type))
     {
-      //FIXME throw or doe something cool
-      std::cerr << "There is already an item factory registered for type "
-                << type.toStdString() << std::endl;
-      return;
+      throw std::runtime_error("There is already an item factory registered for type " + type.toStdString());
     }
     else
     {

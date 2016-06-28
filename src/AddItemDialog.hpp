@@ -27,6 +27,8 @@ private slots:
   void currentItemTypeChanged(QString itemType);
   
 private:
+  /** @throw std::runtime_error if a factory has already been added for one of
+   *                            the types provided by @p factory*/
   void addItemFactory(std::shared_ptr<ItemFactoryInterface> factory);
   
   Ui::DialogAddItem window;

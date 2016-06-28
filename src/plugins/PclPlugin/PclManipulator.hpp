@@ -2,6 +2,7 @@
 #include "envire_visualizer/plugins/ItemManipulatorFactoryInterface.hpp"
 #include <QWidget>
 
+
 class QTableWidget;
 
 namespace envire { namespace viz 
@@ -33,11 +34,14 @@ public:
 private slots:
   //called when the user selects a different item for icp alignment
   void itemSelectionChanged();
+  
+  void alignButtonClicked(bool checked);
 private:
   
   /**Returns a list of all items of @p type in the graph */
   std::vector<envire::core::ItemBase::Ptr> findMatchingItems(const std::type_index& type) const;
   
+  std::vector<envire::core::ItemBase::Ptr> otherItems; //contains all other items from the graph
   envire::core::ItemBase::Ptr selectedItem;
   envire::core::ItemBase::Ptr alignToItem;
   std::shared_ptr<envire::core::EnvireGraph> graph;

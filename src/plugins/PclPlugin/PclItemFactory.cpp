@@ -25,7 +25,6 @@ envire::core::ItemBase::Ptr PclItemFactory::createItem(const std::type_index& ty
   {
     envire::pcl::PointCloud::Ptr item(new envire::pcl::PointCloud());
     const QString pclFile = widget->getPclPath();
-    //FIXME check if file exists
     ::pcl::PCDReader reader;
     if(QFile::exists(pclFile))
     {
@@ -33,7 +32,7 @@ envire::core::ItemBase::Ptr PclItemFactory::createItem(const std::type_index& ty
     }
     else
     {
-      //FIXME ERROR
+      throw std::runtime_error("File does not exist: " + pclFile.toStdString());
     }
     return item;
   }

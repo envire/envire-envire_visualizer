@@ -1,10 +1,15 @@
+#include <pcl/registration/icp.h>
+#include <pcl/conversions.h>
+#include <pcl/common/transforms.h>
 #include "PclManipulator.hpp"
 #include <QHBoxLayout>
-#include <QLabel> //FIXME remove after test
+#include <QLabel> 
 #include <envire_pcl/PointCloud.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 #include <QTableWidget>
 #include <QHeaderView>
+#include <QPushButton>
+
 
 using namespace envire::viz;
 using namespace envire::core;
@@ -38,15 +43,17 @@ PclItemManipulator::PclItemManipulator(ItemBase::Ptr selectedItem,
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->addWidget(alignTo);
     
-    
     itemTable = new QTableWidget(this);
     layout->addWidget(itemTable);
-    setLayout(layout);
     
+    QPushButton* button = new QPushButton("Align", this);
+    layout->addWidget(button);
+    connect(button, SIGNAL(clicked(bool)), this, SLOT(alignButtonClicked(bool)));
+    setLayout(layout);
     
     connect(itemTable, SIGNAL(itemSelectionChanged()), this, SLOT(itemSelectionChanged()));
     
-    std::vector<ItemBase::Ptr> otherItems = findMatchingItems(selectedItem->getTypeIndex());
+    otherItems = findMatchingItems(selectedItem->getTypeIndex());
     itemTable->setRowCount(otherItems.size());
     itemTable->setColumnCount(2);
     for(int i = 0; i < otherItems.size(); ++i)
@@ -91,9 +98,76 @@ void PclItemManipulator::itemSelectionChanged()
     assert(rows.size() > 0);
     //multiselect is disbled, thus all elements in the list belong to the same row
     const int row = rows.at(0).row();
-    std::cout << "ROW: " << row << std::endl;
+    assert(row < otherItems.size());
+    alignToItem = otherItems[row];
   }
 }
+
+void PclItemManipulator::alignButtonClicked(bool checked)
+{
+  assert(alignToItem && selectedItem);
+
+  using EnvPcl = envire::pcl::PointCloud;
+  EnvPcl::Ptr selectedCloud = boost::dynamic_pointer_cast<EnvPcl>(selectedItem);
+  EnvPcl::Ptr otherCloud = boost::dynamic_pointer_cast<EnvPcl>(alignToItem);
+    //they have to be of the correct type, otherwise the user wouldnt have been able to select them
+  assert(selectedCloud);
+  assert(otherCloud);
+  
+  ::pcl::PointCloud<::pcl::PointXYZ> selectedPcl;
+  ::pcl::fromPCLPointCloud2(selectedCloud->getData(), selectedPcl);
+  ::pcl::PointCloud<::pcl::PointXYZ> otherPcl;
+  ::pcl::fromPCLPointCloud2(otherCloud->getData(), otherPcl);
+  
+  GraphTraits::vertex_descriptor selectedDesc = graph->getVertex(selectedItem->getFrame());
+  
+  //the pointclouds are relative to their frames, to align them we have to move
+  //them to the origin coordinate system
+  const Transform selectedTf = graph->getTransform(treeView.root, selectedDesc);
+  ::pcl::PointCloud<::pcl::PointXYZ>::Ptr selectedPclTransformed(new ::pcl::PointCloud<::pcl::PointXYZ>);
+  ::pcl::transformPointCloud(selectedPcl, *selectedPclTransformed.get(), selectedTf.transform.getTransform().cast<float>());
+  
+  const Transform otherTf = graph->getTransform(treeView.root, graph->getVertex(alignToItem->getFrame()));
+  ::pcl::PointCloud<::pcl::PointXYZ>::Ptr otherPclTransformed(new ::pcl::PointCloud<::pcl::PointXYZ>);
+  ::pcl::transformPointCloud(otherPcl, *otherPclTransformed.get(), otherTf.transform.getTransform().cast<float>());
+  
+  
+  ::pcl::IterativeClosestPoint<::pcl::PointXYZ, ::pcl::PointXYZ> icp;
+  icp.setInputCloud(selectedPclTransformed);
+  icp.setInputTarget(otherPclTransformed);
+    
+  ::pcl::PointCloud<::pcl::PointXYZ> selectedAlignedToOther;
+  //use the known transformation between the two frames as icp starting guess
+  const Eigen::Affine3d guess = (otherTf.transform * selectedTf.transform.inverse()).getTransform();
+  std::cout << "Guess: " << std::endl  << guess.matrix() << std::endl;
+  icp.align(selectedAlignedToOther, guess.cast<float>().matrix());
+  if(icp.hasConverged())
+  {
+    const base::Affine3d finalTfMatrix(icp.getFinalTransformation().cast<double>());
+     std::cout << "icp result: " << std::endl << finalTfMatrix.matrix() << std::endl;
+    const base::TransformWithCovariance finalTf(finalTfMatrix);
+    
+
+    GraphTraits::vertex_descriptor parent = treeView.getParent(selectedDesc);
+    std::cout << "parent is: " << graph->getFrameId(parent) << std::endl;
+    if(graph->null_vertex() == parent)
+      parent = selectedDesc;
+    const base::TransformWithCovariance rootToParent(graph->getTransform(treeView.root, parent).transform);
+    
+    std::cout << (rootToParent * selectedTf.transform.inverse()).getTransform().matrix() << std::endl;
+    
+    
+    const base::TransformWithCovariance finalTfInParent =  finalTf * rootToParent;
+    Transform parentToSelected = graph->getTransform(parent, selectedDesc);
+    parentToSelected.transform = finalTfInParent * parentToSelected.transform;
+    graph->updateTransform(parent, selectedDesc, parentToSelected);
+  }
+  else
+  {
+    std::cerr << "ICP did NOT converge" << std::endl;
+  }
+}
+
 
 
 
