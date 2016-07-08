@@ -1,6 +1,6 @@
 #include <QObject> //included at the top to fix an issue with the boost::foreach macro shadowing qt foreach (see http://stackoverflow.com/questions/15191361/boostq-foreach-has-not-been-declared)
 #include "PclItemFactory.hpp"
-#include <envire_pcl/PointCloud.hpp>
+#include <envire_core/items/Item.hpp>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -10,7 +10,7 @@ namespace envire { namespace viz
 
 PclItemFactory::PclItemFactory() : widget(new PclWidget())
 {
-  envire::pcl::PointCloud item;
+  envire::core::Item<pcl::PCLPointCloud2> item;
   supportedTypes.emplace_back(*(item.getTypeInfo()));
 }
 
@@ -23,7 +23,7 @@ envire::core::ItemBase::Ptr PclItemFactory::createItem(const std::type_index& ty
 {
   if(type == supportedTypes[0])
   {
-    envire::pcl::PointCloud::Ptr item(new envire::pcl::PointCloud());
+    envire::core::Item<pcl::PCLPointCloud2>::Ptr item(new envire::core::Item<pcl::PCLPointCloud2>());
     const QString pclFile = widget->getPclPath();
     ::pcl::PCDReader reader;
     if(QFile::exists(pclFile))

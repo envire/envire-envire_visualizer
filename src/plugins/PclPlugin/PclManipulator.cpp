@@ -4,7 +4,7 @@
 #include "PclManipulator.hpp"
 #include <QHBoxLayout>
 #include <QLabel> 
-#include <envire_pcl/PointCloud.hpp>
+#include <envire_core/items/Item.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 #include <QTableWidget>
 #include <QHeaderView>
@@ -17,7 +17,7 @@ using namespace envire::core;
 
 PclItemManipulatorFactory::PclItemManipulatorFactory()
 {
-  envire::pcl::PointCloud item;
+  envire::core::Item<pcl::PCLPointCloud2> item;
   types.emplace_back(*(item.getTypeInfo()));
 }
 
@@ -107,7 +107,7 @@ void PclItemManipulator::alignButtonClicked(bool checked)
 {
   assert(alignToItem && selectedItem);
 
-  using EnvPcl = envire::pcl::PointCloud;
+  using EnvPcl = envire::core::Item<pcl::PCLPointCloud2>;
   EnvPcl::Ptr selectedCloud = boost::dynamic_pointer_cast<EnvPcl>(selectedItem);
   EnvPcl::Ptr otherCloud = boost::dynamic_pointer_cast<EnvPcl>(alignToItem);
     //they have to be of the correct type, otherwise the user wouldnt have been able to select them
