@@ -2,6 +2,7 @@
 #include <envire_core/items/Transform.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/EdgeEvents.hpp>
+#include <envire_core/items/ItemMetadata.hpp>
 #include "Helpers.hpp"
 #include <string>
 #include <glog/logging.h>
