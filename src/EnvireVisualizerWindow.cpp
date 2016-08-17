@@ -7,7 +7,6 @@
 #include "DoubleSpinboxItemDelegate.hpp"
 #include "AddTransformDialog.hpp"
 #include "AddItemDialog.hpp"
-#include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/EdgeEvents.hpp>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -22,7 +21,7 @@ using vertex_descriptor = GraphTraits::vertex_descriptor;
 namespace envire { namespace viz
 {
   
-EnvireVisualizerWindow::EnvireVisualizerWindow(): QMainWindow(), GraphEventDispatcher(),
+EnvireVisualizerWindow::EnvireVisualizerWindow(QWidget * parent, Qt::WindowFlags flags): QMainWindow(parent, flags), GraphEventDispatcher(),
 window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
 firstTimeDisplayingItems(true)
 {
@@ -90,14 +89,24 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   this->graph = graph;
   view2D->displayGraph(*(this->graph.get()));
   this->graph->subscribe(this);
+
+  if(rootNode.isEmpty())
+  {
+    // select the frame of the first vertex as root if no root frame is given
+    EnvireGraph::vertex_iterator it, end;
+    std::tie(it, end) = graph->getVertices();
+    rootFrame = QString::fromStdString(graph->getFrameId(*it));
+  }
+  else
+    rootFrame = rootNode;
   
   //reset the widget because this might not be the first time the user loads a graph
   window->Vizkit3DWidget->clear();
-  window->Vizkit3DWidget->setWorldName(rootNode);
+  window->Vizkit3DWidget->setWorldName(rootFrame);
   window->Vizkit3DWidget->setEnabledManipulators(true);
   
   visualzier.reset(new EnvireGraphVisualizer(graph, window->Vizkit3DWidget,
-                                             rootNode.toStdString(), pluginInfos));
+                                             rootFrame.toStdString(), pluginInfos));
   
   connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this,
           SLOT(frameNameAdded(const QString&)));
@@ -122,7 +131,6 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   window->actionSave_Graph->setEnabled(true);
   window->actionAdd_Item->setEnabled(false); //leave disabled because initially no frame is selected
   
-  rootFrame = rootNode;
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
 }
 
@@ -369,6 +377,18 @@ void EnvireVisualizerWindow::storeGraph()
       graph->saveToFile(file.toStdString());
     }
   }
+}
+
+void EnvireVisualizerWindow::updateGraph(const EnvireGraph& graph)
+{
+    std::shared_ptr<EnvireGraph> new_graph(new EnvireGraph());
+    *new_graph = graph;
+    displayGraph(new_graph, QString());
+}
+
+void EnvireVisualizerWindow::updateGraph(std::shared_ptr< EnvireGraph >& graph)
+{
+    displayGraph(graph, QString());
 }
 
 void EnvireVisualizerWindow::displayItems(const QString& frame)

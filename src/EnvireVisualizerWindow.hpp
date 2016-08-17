@@ -7,6 +7,7 @@
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 #include <unordered_map>
+#include <envire_core/graph/EnvireGraph.hpp>
 
 namespace Ui 
 {
@@ -15,7 +16,6 @@ namespace Ui
 
 namespace envire { namespace core 
 {
-  class EnvireGraph;
   class EdgeModifiedEvent;
 }}
 
@@ -34,7 +34,7 @@ class EnvireVisualizerWindow : public QMainWindow, public envire::core::GraphEve
 public:
   
   /**Create an unitialized envire visualizer that displays nothing.*/
-  EnvireVisualizerWindow();
+  EnvireVisualizerWindow(QWidget * parent = 0, Qt::WindowFlags flags = 0);
   
   /**called whenever some edge in the graph changes */
   virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
@@ -68,6 +68,9 @@ public slots:
   /**Is called whenever the user wants to move a frame in the ui using the dragger */
   void frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
   void frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
+
+  void updateGraph(const envire::core::EnvireGraph& graph);
+  void updateGraph(std::shared_ptr<envire::core::EnvireGraph>& graph);
     
 private slots:
   void framePicked(const QString&);
