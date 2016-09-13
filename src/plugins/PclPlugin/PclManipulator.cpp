@@ -6,6 +6,7 @@
 #include <QLabel> 
 #include <envire_core/items/Item.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
+#include <envire_core/items/Item.hpp>
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QPushButton>

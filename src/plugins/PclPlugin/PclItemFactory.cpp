@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <pcl/io/pcd_io.h>
+#include <envire_core/items/Item.hpp>
 namespace envire { namespace viz 
 {
 
@@ -36,6 +37,7 @@ envire::core::ItemBase::Ptr PclItemFactory::createItem(const std::type_index& ty
     }
     return item;
   }
+  return nullptr;
 }
 
 const std::vector< std::type_index >& PclItemFactory::getSupportedTypes()
