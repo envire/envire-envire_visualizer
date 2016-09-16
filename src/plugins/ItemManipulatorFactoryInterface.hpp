@@ -2,7 +2,6 @@
 #include <envire_core/items/ItemBase.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/graph/TreeView.hpp>
-#include <osgViz/plugins/Object.h>
 class QWidget;
 
 
@@ -28,6 +27,7 @@ public:
    *       E.g. if you want to support envire::pcl::Pointcloud this list should
    *       contain the result of envire::pcl::PointCloud::getTypeInfo() */
   virtual const std::vector<std::type_index>& getSupportedTypes() = 0;
+  virtual ~ItemManipulatorFactoryInterface() {}
 };
 
 }}

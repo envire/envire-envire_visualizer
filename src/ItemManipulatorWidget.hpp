@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <envire_core/items/ItemBase.hpp>
 #include <memory>
-#include <osgViz/plugins/Object.h>
 
 class QVBoxLayout;
 class QLabel;
