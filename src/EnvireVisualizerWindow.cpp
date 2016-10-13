@@ -117,7 +117,7 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   window->treeView->setEnabled(false); //leave disabled because initially no frame is selected
   window->listWidget->setEnabled(true);
   window->Vizkit3DWidget->setEnabled(true);
-  window->actionAdd_Frame->setEnabled(true);
+  window->actionAdd_Frame->setEnabled(false);
   window->actionRemove_Frame->setEnabled(false); //leave disabled because initially no frame is selected
   window->actionSave_Graph->setEnabled(true);
   window->actionAdd_Item->setEnabled(false); //leave disabled because initially no frame is selected
@@ -236,7 +236,9 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
     else
       window->actionRemove_Frame->setEnabled(true);
     
-    window->actionAdd_Item->setEnabled(true);//is disabled if no frame was selected before
+    //are disabled if no frame was selected before
+    window->actionAdd_Item->setEnabled(true);
+    window->actionAdd_Frame->setEnabled(true);
     
     window->Vizkit3DWidget->selectFrame(name, true);
     selectedFrame = name;
@@ -270,6 +272,7 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
 
 void EnvireVisualizerWindow::frameNameAdded(const QString& name)
 {
+    std::cout << "ADDED: " << name.toStdString() << std::endl;
   window->listWidget->addItem(name);
   view2D->displayGraph(*(this->graph.get()));
 }

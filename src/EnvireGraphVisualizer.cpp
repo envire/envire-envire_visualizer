@@ -31,7 +31,7 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::Envir
                                std::placeholders::_1, std::placeholders::_2);
   tree.edgeRemoved.connect(edgeRemoved);
   
-  
+  addFrameName(QString::fromStdString(rootNode));
   
   //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
   graph->getTree(rootNode, true, &tree);
