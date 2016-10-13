@@ -40,4 +40,8 @@ rock_library(envire_visualizer
              DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget
              DEPS_PKGCONFIG base-lib)    
              
-
+rock_executable(envire_visualizer_bin
+                SOURCES VisualizerMain.cpp
+                DEPS envire_visualizer
+)
+             
