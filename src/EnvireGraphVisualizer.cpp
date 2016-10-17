@@ -39,7 +39,7 @@ void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const Fra
         //clear old stuff before re-initializing
         tree.unsubscribe();
         tree.clear();
-        clearFrameNames();
+        clearFrames();
         clearItemVisuals();
     }
     else
@@ -273,10 +273,12 @@ const TreeView& EnvireGraphVisualizer::getTree() const
   return tree;
 }
 
-void EnvireGraphVisualizer::clearFrameNames()
+void EnvireGraphVisualizer::clearFrames()
 {
     while(frameNames.size() > 0)
     {
+    QMetaObject::invokeMethod(widget, "removeFrame", Qt::QueuedConnection,
+                              Q_ARG(QString, *frameNames.begin()));
         removeFrameName(*frameNames.begin());
     }
 }

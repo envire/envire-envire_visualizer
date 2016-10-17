@@ -55,15 +55,13 @@ void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& v
     
     if(p->initialized)
     {
-        static bool first = true;
         *(p->graph.get()) = value;
-        if(p->graph->num_vertices() > 0 && first)
+        if(p->graph->num_vertices())
         {
             const FrameId root = p->graph->getFrameId(*(p->graph->getVertices().first));
             //FIXME the user should be able to choose the root node
             //FIXME reinitializing every time is probably really expensive
             p->visualizer->init(p->graph, root);
-            first = false;
         }
     }
 }

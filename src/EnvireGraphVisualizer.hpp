@@ -81,8 +81,11 @@ private:
   void addFrameName(const QString& name);
   /**Removes @p name from frameNames and emits frameRemoved */
   void removeFrameName(const QString& name);
-  /**removes all frame names from frameNames. Emits frameRemoved for each name */
-  void clearFrameNames();
+  
+  /**removes all frame names from frameNames.
+   * Removes the frames from the widget aswell.
+   * Emits frameRemoved for each name */
+  void clearFrames();
   
   /**Remove @p item from the Vizkit3dWidget */
   void removeItemPlugin(vizkit3d::VizPluginBase* item);
