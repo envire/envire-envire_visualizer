@@ -22,7 +22,7 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::Envir
                                              const FrameId& rootNode,
                                              std::shared_ptr<Vizkit3dPluginInformation> pluginInfos) :
     GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos),
-    initialized(true)
+    initialized(false)
 { 
     init(graph, rootNode);
 }
