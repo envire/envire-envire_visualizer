@@ -21,22 +21,49 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::Envir
                                              Vizkit3DWidget* widget, 
                                              const FrameId& rootNode,
                                              std::shared_ptr<Vizkit3dPluginInformation> pluginInfos) :
-  GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos)
+    GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos),
+    initialized(true)
 { 
-  auto edgeAdded = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
-                             std::placeholders::_1, std::placeholders::_2);
-  tree.edgeAdded.connect(edgeAdded);
-  
-  auto edgeRemoved = std::bind(&EnvireGraphVisualizer::edgeRemovedFromTree, this,
-                               std::placeholders::_1, std::placeholders::_2);
-  tree.edgeRemoved.connect(edgeRemoved);
-  
-  addFrameName(QString::fromStdString(rootNode));
-  
-  //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
-  graph->getTree(rootNode, true, &tree);
-  widget->setRootFrame(QString::fromStdString(rootNode));
+    init(graph, rootNode);
 }
+
+EnvireGraphVisualizer::EnvireGraphVisualizer(vizkit3d::Vizkit3DWidget* widget,
+                                             std::shared_ptr<Vizkit3dPluginInformation> pluginInfos) :
+    widget(widget), pluginInfos(pluginInfos), initialized(false)
+{}
+
+void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const FrameId& rootNode)
+{
+    if(initialized)
+    {
+        //clear old stuff before re-initializing
+        tree.unsubscribe();
+        tree.clear();
+        clearFrameNames();
+        clearItemVisuals();
+    }
+    else
+    {
+        //only do this upon first initialization
+        auto edgeAdded = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
+                                    std::placeholders::_1, std::placeholders::_2);
+        tree.edgeAdded.connect(edgeAdded);
+        
+        auto edgeRemoved = std::bind(&EnvireGraphVisualizer::edgeRemovedFromTree, this,
+                                    std::placeholders::_1, std::placeholders::_2);
+        tree.edgeRemoved.connect(edgeRemoved);
+    }
+
+    rootId = rootNode;    
+    addFrameName(QString::fromStdString(rootNode));
+    
+    //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
+    graph->getTree(rootNode, true, &tree);
+    
+    initialized = true;
+}
+
+
 
 void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target)
 {
@@ -88,12 +115,28 @@ void EnvireGraphVisualizer::itemRemoved(const envire::core::ItemRemovedEvent& e)
     }
     VizPluginBase* itemViz = itemVisuals.at(e.item->getID());//may throw
     itemVisuals.erase(e.item->getID());
-    ASSERT_NOT_NULL(itemViz);
-    Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
-    QMetaObject::invokeMethod(widget, "removePlugin", conType, Q_ARG(QObject*, itemViz));
+    removeItemPlugin(itemViz);
     LOG(INFO) << "Removed item " << e.item->getIDString();
   }
 }
+
+void EnvireGraphVisualizer::clearItemVisuals()
+{
+    while(itemVisuals.size() > 0)
+    {
+        removeItemPlugin(itemVisuals.begin()->second);
+        itemVisuals.erase(itemVisuals.begin());
+    }
+}
+
+
+void EnvireGraphVisualizer::removeItemPlugin(VizPluginBase* itemViz)
+{
+    ASSERT_NOT_NULL(itemViz);
+    Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+    QMetaObject::invokeMethod(widget, "removePlugin", conType, Q_ARG(QObject*, itemViz));
+}
+
 
 std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const Transform& tf) const
 {
@@ -228,6 +271,15 @@ const TreeView& EnvireGraphVisualizer::getTree() const
 {
   return tree;
 }
+
+void EnvireGraphVisualizer::clearFrameNames()
+{
+    while(frameNames.size() > 0)
+    {
+        removeFrameName(*frameNames.begin());
+    }
+}
+
 
 EnvireGraphVisualizer::~EnvireGraphVisualizer()
 {

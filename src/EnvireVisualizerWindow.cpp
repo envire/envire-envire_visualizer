@@ -98,6 +98,7 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   
   visualzier.reset(new EnvireGraphVisualizer(graph, window->Vizkit3DWidget,
                                              rootNode.toStdString(), pluginInfos));
+  window->Vizkit3DWidget->setRootFrame(rootNode);
   
   connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this,
           SLOT(frameNameAdded(const QString&)));

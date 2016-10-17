@@ -35,6 +35,16 @@ public:
                         vizkit3d::Vizkit3DWidget* widget, 
                         const envire::core::FrameId& rootNode,
                         std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
+  
+    /**Allows for lazy initialization */
+    EnvireGraphVisualizer(vizkit3d::Vizkit3DWidget* widget,
+                          std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
+    
+    /** (re)-initializes the visualizer. Use this method to change the displayed
+     *  graph*/
+    void init(std::shared_ptr<envire::core::EnvireGraph> graph,
+              const envire::core::FrameId& rootNode);
+  
   ~EnvireGraphVisualizer();
   
   const QSet<QString>& getFrameNames() const;
@@ -71,6 +81,13 @@ private:
   void addFrameName(const QString& name);
   /**Removes @p name from frameNames and emits frameRemoved */
   void removeFrameName(const QString& name);
+  /**removes all frame names from frameNames. Emits frameRemoved for each name */
+  void clearFrameNames();
+  
+  /**Remove @p item from the Vizkit3dWidget */
+  void removeItemPlugin(VizPluginBase* item);
+  /**Removes all item visuals from itemVisuals and from the widget */
+  void clearItemVisuals();
   
   
   /**Gets the current transformation between @p origin and @p target from the
@@ -89,6 +106,8 @@ private:
   std::shared_ptr<Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
   ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
   QSet<QString> frameNames; //contains the names of all frames in the current tree
+  bool initialized;
+  envire::core::FrameId rootId;
 };
 
 }}
