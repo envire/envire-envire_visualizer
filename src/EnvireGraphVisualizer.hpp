@@ -85,7 +85,7 @@ private:
   void clearFrameNames();
   
   /**Remove @p item from the Vizkit3dWidget */
-  void removeItemPlugin(VizPluginBase* item);
+  void removeItemPlugin(vizkit3d::VizPluginBase* item);
   /**Removes all item visuals from itemVisuals and from the widget */
   void clearItemVisuals();
   
