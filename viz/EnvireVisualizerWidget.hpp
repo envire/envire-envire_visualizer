@@ -19,7 +19,7 @@ namespace vizkit3d
 
     Q_INVOKABLE void updateData(envire::core::EnvireGraph const &sample)
     {vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>::updateData(sample);}
-
+    
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode(osg::Node* node);

@@ -57,6 +57,7 @@ void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const Fra
     rootId = rootNode;    
     addFrameName(QString::fromStdString(rootNode));
     
+    this->graph = graph;
     //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
     graph->getTree(rootNode, true, &tree);
     

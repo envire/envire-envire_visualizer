@@ -1,20 +1,26 @@
 #include <iostream>
 #include "EnvireVisualizerWidget.hpp"
+#include <envire_visualizer/EnvireGraphVisualizer.hpp>
+#include <memory>
 
 using namespace vizkit3d;
+using namespace envire::core;
+using namespace std;
+using namespace envire::viz;
 
 struct EnvireVisualizerWidget::Data {
-    // Copy of the value given to updateDataIntern.
-    //
-    // Making a copy is required because of how OSG works
-    envire::core::EnvireGraph data;
+    shared_ptr<EnvireGraph> graph;
+    shared_ptr<EnvireGraphVisualizer> visualizer;
+    shared_ptr<Vizkit3dPluginInformation> pluginInfos;
+    bool initialized = false;
+    
 };
+
 
 
 EnvireVisualizerWidget::EnvireVisualizerWidget()
     : p(new Data)
-{
-}
+{}
 
 EnvireVisualizerWidget::~EnvireVisualizerWidget()
 {
@@ -23,8 +29,6 @@ EnvireVisualizerWidget::~EnvireVisualizerWidget()
 
 osg::ref_ptr<osg::Node> EnvireVisualizerWidget::createMainNode()
 {
-    // Geode is a common node used for vizkit3d plugins. It allows to display
-    // "arbitrary" geometries
     return new osg::Geode();
 }
 
@@ -37,8 +41,31 @@ void EnvireVisualizerWidget::updateMainNode ( osg::Node* node )
 
 void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& value)
 {
-    p->data = value;
-    std::cout << "got new sample data" << std::endl;
+    if(!p->initialized)
+    {
+        //wait for the widget to become fully initialized. depending on who created it this might never happen
+        if(getWidget() != nullptr) 
+        {
+            p->graph.reset(new EnvireGraph);
+            p->pluginInfos.reset(new Vizkit3dPluginInformation(getWidget()));
+            p->visualizer.reset(new EnvireGraphVisualizer(getWidget(), p->pluginInfos));
+            p->initialized = true;
+        }
+    }
+    
+    if(p->initialized)
+    {
+        static bool first = true;
+        *(p->graph.get()) = value;
+        if(p->graph->num_vertices() > 0 && first)
+        {
+            const FrameId root = p->graph->getFrameId(*(p->graph->getVertices().first));
+            //FIXME the user should be able to choose the root node
+            //FIXME reinitializing every time is probably really expensive
+            p->visualizer->init(p->graph, root);
+            first = false;
+        }
+    }
 }
 
 //Macro that makes this plugin loadable in ruby, this is optional.
