@@ -7,7 +7,7 @@ struct EnvireVisualizerWidget::Data {
     // Copy of the value given to updateDataIntern.
     //
     // Making a copy is required because of how OSG works
-    envire_visualizer data;
+    envire::core::EnvireGraph data;
 };
 
 
@@ -32,9 +32,10 @@ void EnvireVisualizerWidget::updateMainNode ( osg::Node* node )
 {
     osg::Geode* geode = static_cast<osg::Geode*>(node);
     // Update the main node using the data in p->data
+    
 }
 
-void EnvireVisualizerWidget::updateDataIntern(envire_visualizer const& value)
+void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& value)
 {
     p->data = value;
     std::cout << "got new sample data" << std::endl;

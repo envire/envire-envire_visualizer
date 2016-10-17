@@ -9,7 +9,7 @@
 namespace vizkit3d
 {
     class EnvireVisualizerWidget
-        : public vizkit3d::Vizkit3DPlugin<envire_visualizer>
+        : public vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>
         , boost::noncopyable
     {
     Q_OBJECT
@@ -17,13 +17,13 @@ namespace vizkit3d
         EnvireVisualizerWidget();
         ~EnvireVisualizerWidget();
 
-    Q_INVOKABLE void updateData(envire_visualizer const &sample)
-    {vizkit3d::Vizkit3DPlugin<envire_visualizer>::updateData(sample);}
+    Q_INVOKABLE void updateData(envire::core::EnvireGraph const &sample)
+    {vizkit3d::Vizkit3DPlugin<envire::core::EnvireGraph>::updateData(sample);}
 
     protected:
         virtual osg::ref_ptr<osg::Node> createMainNode();
         virtual void updateMainNode(osg::Node* node);
-        virtual void updateDataIntern(envire_visualizer const& plan);
+        virtual void updateDataIntern(envire::core::EnvireGraph const& plan);
         
     private:
         struct Data;
