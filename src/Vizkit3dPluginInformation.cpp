@@ -19,14 +19,13 @@ void Vizkit3dPluginInformation::loadData()
   for(const QString& libName : *availablePlugins)
   {
     QObject* plugin = nullptr;
-    QMetaObject::invokeMethod(mainWidget, "loadPlugin", conType,
+    QMetaObject::invokeMethod(mainWidget, "createPlugin", conType,
                               Q_RETURN_ARG(QObject*, plugin),
                               Q_ARG(QString, libName), Q_ARG(QString, ""));
     if(nullptr != plugin)
     {
       loadPluginData(plugin, libName);
-      QMetaObject::invokeMethod(mainWidget, "removePlugin", conType,
-                                Q_ARG(QObject*, plugin));   
+      delete plugin;
     }
   }
 }
