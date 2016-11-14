@@ -161,6 +161,7 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 
 void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
 {
+  LOG(INFO) << "Loading Visualizer for item: " << item->getIDString();  
   if(itemVisuals.find(item->getID()) != itemVisuals.end())
   {
     LOG(ERROR) << "Ignoring item " << item->getIDString() << ". It already has a visual.";

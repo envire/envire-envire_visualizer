@@ -16,7 +16,7 @@
 #include "envire_core/EnvireGraph2DStructurWidget.hpp"
 #include "ItemManipulatorWidget.hpp"
 
-using namespace envire::core;
+using namespace envire::core;  
 using vertex_descriptor = GraphTraits::vertex_descriptor;
 
 namespace envire { namespace viz

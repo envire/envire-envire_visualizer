@@ -19,8 +19,9 @@ QWidget* PclItemFactory::getConfigurationWidget(const std::type_index& type)
 {
   return widget;
 }
-envire::core::ItemBase::Ptr PclItemFactory::createItem(const std::type_index& type,
-                                                       const QWidget* configWidget)
+
+void PclItemFactory::addItem(const std::type_index& type, std::shared_ptr<envire::core::EnvireGraph> graph,
+                             const envire::core::FrameId& frame, const QWidget* configWidget)
 {
   if(type == supportedTypes[0])
   {
@@ -35,9 +36,8 @@ envire::core::ItemBase::Ptr PclItemFactory::createItem(const std::type_index& ty
     {
       throw std::runtime_error("File does not exist: " + pclFile.toStdString());
     }
-    return item;
+    graph->addItemToFrame(frame, item);
   }
-  return nullptr;
 }
 
 const std::vector< std::type_index >& PclItemFactory::getSupportedTypes()

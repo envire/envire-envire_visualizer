@@ -1,5 +1,6 @@
 #include "AddItemDialog.hpp"
 #include "plugins/PclPlugin/PclItemFactory.hpp"
+#include "plugins/SmurfPlugin/SmurfItemFactory.h"
 #include <envire_core/util/Demangle.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 
@@ -15,8 +16,10 @@ AddItemDialog::AddItemDialog(QWidget* parent): QDialog(parent),
   
   connect(window.comboBoxType, SIGNAL(currentIndexChanged(QString)),
           this, SLOT(currentItemTypeChanged(QString)));
+  
   //for now plugins are simply added manually. this might change later.
   addItemFactory(shared_ptr<ItemFactoryInterface>(new PclItemFactory()));
+  addItemFactory(shared_ptr<SmurfItemFactory>(new SmurfItemFactory()));
   
   for(ItemFactoryHash::const_iterator it = itemFactories.begin();
       it != itemFactories.end(); ++it)
@@ -66,9 +69,7 @@ void AddItemDialog::accept()
   TypeHash::iterator indexIterator = itemTypes.find(currentItemType);
   assert(indexIterator != itemTypes.end());
   
-  ItemBase::Ptr item = factory->createItem(indexIterator.value(), currentConfigWidget);
-  item->setFrame(targetFrame.toStdString());
-  graph->addItem(item);
+  factory->addItem(indexIterator.value(), graph, targetFrame.toStdString(), currentConfigWidget);
   
   QDialog::accept();
 }

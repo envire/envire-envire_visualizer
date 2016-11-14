@@ -37,6 +37,7 @@ rock_library(envire_visualizer
                      addtransformdialog.ui
                      additemdialog.ui
              DEPS envire_visualizer_pcl_plugin
+                  envire_visualizer_smurf_plugin
              DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget
              DEPS_PKGCONFIG base-lib)    
              

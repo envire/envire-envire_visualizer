@@ -1,5 +1,5 @@
 #pragma once
-#include <envire_core/items/ItemBase.hpp>
+#include <envire_core/graph/EnvireGraph.hpp>
 #include <vector>
 #include <type_traits>
 
@@ -17,13 +17,12 @@ public:
    * to the createItem() method later on*/
   virtual QWidget* getConfigurationWidget(const std::type_index& type) = 0;
   
-  /**Create a new item of @p type.
+  /**Create a new item of @p type and add it to @p frame in @p graph.
    * This method is called in the gui thread.
    * When this method is called a QApplication exists.
-   * @return a new instance of the requested type or nullptr if the type is
-   *         not supported.*/
-  virtual envire::core::ItemBase::Ptr createItem(const std::type_index& type,
-                                                 const QWidget* configWidget) = 0;
+   * */
+  virtual void addItem(const std::type_index& type, std::shared_ptr<envire::core::EnvireGraph> graph,
+                       const envire::core::FrameId& frame, const QWidget* configWidget) = 0;
   
   /**Returns a vector of all types that this factory can create.
    * @note This should be the item types, not the types of the embedded data.
