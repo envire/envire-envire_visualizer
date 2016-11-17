@@ -5,6 +5,7 @@
   <license>GPLv2 or later</license>
   <depend package="graphviz" />
   <depend package="envire/envire_core" />
-  <depend package="envire/envire_pcl" /> 
+  <depend package="envire/envire_pcl" />
+  <depend package="envire/envire_smurf" />
   <depend package="gui/vizkit3d" />
 </package>
