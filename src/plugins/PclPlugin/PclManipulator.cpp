@@ -1,4 +1,4 @@
-#include <pcl/registration/icp.h>
+#include <pcl/registration/gicp.h>
 #include <pcl/conversions.h>
 #include <pcl/common/transforms.h>
 #include "PclManipulator.hpp"
@@ -125,29 +125,30 @@ void PclItemManipulator::alignButtonClicked(bool checked)
   //the pointclouds are relative to their frames, to align them we have to move
   //them to the origin coordinate system
   const Transform selectedTf = graph->getTransform(treeView.root, selectedDesc);
-  ::pcl::PointCloud<::pcl::PointXYZ>::Ptr selectedPclTransformed(new ::pcl::PointCloud<::pcl::PointXYZ>);
-  ::pcl::transformPointCloud(selectedPcl, *selectedPclTransformed.get(), selectedTf.transform.getTransform().cast<float>());
-  
   const Transform otherTf = graph->getTransform(treeView.root, graph->getVertex(alignToItem->getFrame()));
+
+  // other in selected tf
+  const Eigen::Affine3d otherInSelected = (selectedTf.transform.inverse() * otherTf.transform).getTransform();
+  std::cout << "otherInSelected: " << std::endl  << otherInSelected.matrix() << std::endl;
+
   ::pcl::PointCloud<::pcl::PointXYZ>::Ptr otherPclTransformed(new ::pcl::PointCloud<::pcl::PointXYZ>);
-  ::pcl::transformPointCloud(otherPcl, *otherPclTransformed.get(), otherTf.transform.getTransform().cast<float>());
+  ::pcl::transformPointCloud(otherPcl, *otherPclTransformed.get(), otherInSelected.cast<float>());
   
-  
-  ::pcl::IterativeClosestPoint<::pcl::PointXYZ, ::pcl::PointXYZ> icp;
-  icp.setInputCloud(selectedPclTransformed);
+  ::pcl::GeneralizedIterativeClosestPoint<::pcl::PointXYZ, ::pcl::PointXYZ> icp;
+  // TODO make max correspondence distance configurable
+  icp.setMaxCorrespondenceDistance(1.0);
+  icp.setInputCloud(selectedPcl.makeShared());
   icp.setInputTarget(otherPclTransformed);
-    
+
   ::pcl::PointCloud<::pcl::PointXYZ> selectedAlignedToOther;
   //use the known transformation between the two frames as icp starting guess
-  const Eigen::Affine3d guess = (otherTf.transform * selectedTf.transform.inverse()).getTransform();
-  std::cout << "Guess: " << std::endl  << guess.matrix() << std::endl;
-  icp.align(selectedAlignedToOther, guess.cast<float>().matrix());
+  icp.align(selectedAlignedToOther);
+
   if(icp.hasConverged())
   {
     const base::Affine3d finalTfMatrix(icp.getFinalTransformation().cast<double>());
      std::cout << "icp result: " << std::endl << finalTfMatrix.matrix() << std::endl;
-    const base::TransformWithCovariance finalTf(finalTfMatrix);
-    
+    const base::TransformWithCovariance result(finalTfMatrix);
 
     GraphTraits::vertex_descriptor parent = treeView.getParent(selectedDesc);
     std::cout << "parent is: " << graph->getFrameId(parent) << std::endl;
@@ -158,17 +159,13 @@ void PclItemManipulator::alignButtonClicked(bool checked)
     std::cout << (rootToParent * selectedTf.transform.inverse()).getTransform().matrix() << std::endl;
     
     
-    const base::TransformWithCovariance finalTfInParent =  finalTf * rootToParent;
     Transform parentToSelected = graph->getTransform(parent, selectedDesc);
-    parentToSelected.transform = finalTfInParent * parentToSelected.transform;
+    parentToSelected.transform = parentToSelected.transform * result;
     graph->updateTransform(parent, selectedDesc, parentToSelected);
+    graph->updateTransform(selectedDesc, parent, parentToSelected.inverse());
   }
   else
   {
     std::cerr << "ICP did NOT converge" << std::endl;
   }
 }
-
-
-
-
