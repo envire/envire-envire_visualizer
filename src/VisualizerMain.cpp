@@ -7,12 +7,19 @@ using namespace envire::viz;
 
 int main(int argc, char **argv)
 {
-  QApplication app(argc, argv);
-  EnvireVisualizerWindow window;
-  std::shared_ptr<EnvireGraph> graph(new EnvireGraph);
-  graph->addFrame("Root");
-  window.displayGraph(graph, "Root");
-  window.show();
-  app.exec();
-  return 0;
+    QApplication app(argc, argv);
+    EnvireVisualizerWindow window;
+    if (argc > 1)
+    {
+        window.displayGraph(QString(argv[1]));
+    }
+    else
+    {
+        std::shared_ptr<EnvireGraph> graph(new EnvireGraph);
+        graph->addFrame("root");
+        window.displayGraph(graph, "root");
+    }
+    window.show();
+    app.exec();
+    return 0;
 }
