@@ -1,4 +1,4 @@
-find_package(PCL 1.7 REQUIRED COMPONENTS common)
+find_package(PCL 1.8 REQUIRED COMPONENTS common)
 
 rock_library(envire_visualizer_pcl_plugin 
              MOC     PclWidget.hpp
