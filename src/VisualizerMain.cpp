@@ -25,7 +25,7 @@
 //
 
 #include <envire_visualizer/EnvireVisualizerWindow.hpp>
-#include <envire_core/graph/EnvireGraph.hpp>
+#include <envire_core/graph/EnvireGraph.hpp> 
 #include <QApplication>
 
 using namespace envire::core;

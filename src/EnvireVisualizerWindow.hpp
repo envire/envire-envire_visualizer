@@ -27,17 +27,27 @@
 #pragma once
 #include "TransformModel.hpp"
 #include "ItemTableModel.hpp"
-#include <QMainWindow>
+#include <QMainWindow> 
 #include <QListWidgetItem>
 #include <memory>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 #include <unordered_map>
 
+class QTableView;
+class QTreeView;
+class QListWidget;
+
 namespace Ui 
 {
   class MainWindow;
 }
+
+namespace vizkit3d
+{
+    class Vizkit3DWidget;
+}
+
 
 namespace envire { namespace core 
 {
@@ -139,8 +149,11 @@ private:
   AddItemDialog* addItemDialog;
   envire::core::ItemBase::Ptr selectedItem;
   ItemManipulatorWidget* itemManipulator;
+  vizkit3d::Vizkit3DWidget* vizkit3dWidget;
+  QTableView* tableViewItems;
+  QTreeView* treeViewSelectedFrame;
+  QListWidget* listWidgetFrames;
 };
-  
   
   
 }}
