@@ -62,8 +62,6 @@ firstTimeDisplayingItems(true)
   treeViewSelectedFrame = new QTreeView(vizkit3dWidget);
   listWidgetFrames = new QListWidget(vizkit3dWidget);
   
-  //FIXME fix the hack 
-  //HACK to display the widget, cannot be displayed from designer right now :/
   window->tabWidget->addTab(vizkit3dWidget, "3D View");
   
   view2D = new EnvireGraph2DStructurWidget();
@@ -143,6 +141,10 @@ void EnvireVisualizerWindow::redraw()
     if(visualzier)
     {
         visualzier->redraw();
+    }
+    if(graph)
+    {
+        view2D->displayGraph(*(graph.get()));
     }
 }
 
