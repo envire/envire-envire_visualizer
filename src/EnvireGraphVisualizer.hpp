@@ -33,13 +33,16 @@
 #include <envire_core/graph/TreeView.hpp>
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/items/ItemBase.hpp>
+#include <envire_core/items/Transform.hpp>
 #include <boost/uuid/uuid.hpp>
+#include <boost/functional/hash.hpp>
 #include <memory>
+#include <unordered_map>
+#include <mutex>
 #include "Vizkit3dPluginInformation.hpp"
 
 namespace envire { namespace core 
 {
-  class Transform;
   class EnvireGraph;
 }}
 
@@ -77,6 +80,14 @@ public:
   
   /**Returns a reference to the TreeView that is currently visualized. */
   const envire::core::TreeView& getTree() const;
+  
+public slots:
+    /**Get all transformation changes from the graph and redraw the graph.
+     * @note expensive, don't call too often.
+     * @note This method is not thread safe. Do **not** modify the graph while
+     *       redrawing.
+     */ 
+    void redraw();
   
 protected:
   /**Is invoked whenever a transform changes in the graph */
@@ -137,6 +148,12 @@ private:
   QSet<QString> frameNames; //contains the names of all frames in the current tree
   bool initialized;
   envire::core::FrameId rootId;
+  
+  std::mutex transformationsToUpdateMutex;
+  /**Buffer that stores all transformations that need to be updated since the last redraw */
+  using TransformToUpdateMap = std::unordered_map<std::pair<std::string, std::string>, envire::core::Transform,  boost::hash <std::pair <std::string, std::string>>>;
+  TransformToUpdateMap transformationsToUpdate;
+  
 };
 
 }}

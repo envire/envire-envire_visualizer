@@ -25,13 +25,13 @@
 //
 
 #include "EnvireGraphVisualizer.hpp"
-#include <envire_core/items/Transform.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/EdgeEvents.hpp>
 #include <envire_core/items/ItemMetadata.hpp>
 #include "Helpers.hpp"
 #include <string>
 #include <glog/logging.h>
+#include <chrono>
 
 using namespace envire::core;
 using namespace vizkit3d;
@@ -252,25 +252,50 @@ void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
   }
 }
 
+
+
 void EnvireGraphVisualizer::setTransformation(const vertex_descriptor origin,
                                               const vertex_descriptor target)
 {
-  const Transform tf = graph->getTransform(origin, target);
-  QQuaternion rot;
-  QVector3D trans;
-  std::tie(rot, trans) = convertTransform(tf);
-  const QString qSrc = QString::fromStdString(graph->getFrameId(origin));
-  const QString qTarget = QString::fromStdString(graph->getFrameId(target));
-  //needs to be invoked because we might have been called from the non-gui thread
-  QMetaObject::invokeMethod(widget, "setTransformation", Qt::QueuedConnection,
-                            Q_ARG(QString, qSrc), Q_ARG(QString, qTarget),
-                            Q_ARG(QVector3D, trans), Q_ARG(QQuaternion, rot));
+    setTransformation(graph->getFrameId(origin), graph->getFrameId(target));
 }
 
 void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const FrameId& target)
 {
-  setTransformation(graph->getVertex(origin), graph->getVertex(target));
+    std::lock_guard<std::mutex> lock(transformationsToUpdateMutex);
+    //transformation changes are buffered and applied when redraw() is called
+    transformationsToUpdate[std::make_pair(origin, target)] = graph->getTransform(origin, target);
 }
+
+
+void EnvireGraphVisualizer::redraw()
+{
+  //copy set to keep lock time as little as possible
+  transformationsToUpdateMutex.lock();
+  TransformToUpdateMap updateMap(transformationsToUpdate);
+  transformationsToUpdate.clear();
+  transformationsToUpdateMutex.unlock();
+  
+  for(const auto updatePair  : updateMap)
+  {
+      const FrameId& origin = updatePair.first.first;
+      const FrameId& target = updatePair.first.second;
+
+      const Transform& tf = updatePair.second;
+      QQuaternion rot;
+      QVector3D trans;
+      std::tie(rot, trans) = convertTransform(tf);
+      const QString qSrc = QString::fromStdString(origin);
+      const QString qTarget = QString::fromStdString(target);
+      
+      //needs to be invoked because we might have been called from the non-gui thread
+      QMetaObject::invokeMethod(widget, "setTransformation", Qt::QueuedConnection,
+                                Q_ARG(QString, qSrc), Q_ARG(QString, qTarget),
+                                Q_ARG(QVector3D, trans), Q_ARG(QQuaternion, rot));
+  }
+}
+
+
 
 const QSet<QString>& EnvireGraphVisualizer::getFrameNames() const
 {

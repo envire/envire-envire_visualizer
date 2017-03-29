@@ -104,6 +104,10 @@ public slots:
   /**Is called whenever the user wants to move a frame in the ui using the dragger */
   void frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
   void frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
+  
+  /**Redraw the graph structure. This has to be called after the graph structure has changed.
+   * @note Only call if you know that the graph is not modifed at the same time*/
+  void redraw();
     
 private slots:
   void framePicked(const QString&);

@@ -27,6 +27,7 @@
 #include <envire_visualizer/EnvireVisualizerWindow.hpp>
 #include <envire_core/graph/EnvireGraph.hpp> 
 #include <QApplication>
+#include <QTimer>
 
 using namespace envire::core;
 using namespace envire::viz;
@@ -46,6 +47,11 @@ int main(int argc, char **argv)
         window.displayGraph(graph, "root");
     }
     window.show();
+    
+    QTimer t;
+    EnvireVisualizerWindow::connect(&t, SIGNAL(timeout()), &window, SLOT(redraw()));
+    t.start(33);
+    
     app.exec();
     return 0;
 }

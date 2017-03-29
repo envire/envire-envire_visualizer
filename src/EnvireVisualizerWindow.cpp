@@ -138,6 +138,15 @@ QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
   
 }
   
+void EnvireVisualizerWindow::redraw()
+{
+    if(visualzier)
+    {
+        visualzier->redraw();
+    }
+}
+
+  
 void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
@@ -192,6 +201,8 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   
   rootFrame = rootNode;
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
+  
+  redraw();
 }
 
 void EnvireVisualizerWindow::displayGraph(const QString& filePath)
