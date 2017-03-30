@@ -264,6 +264,8 @@ void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const Frame
 {
     std::lock_guard<std::mutex> lock(transformationsToUpdateMutex);
     //transformation changes are buffered and applied when redraw() is called
+    //this is done because some users make up to 22k transformation changes and
+    //direct redrawing is simply not possible with those numbers
     transformationsToUpdate[std::make_pair(origin, target)] = graph->getTransform(origin, target);
 }
 

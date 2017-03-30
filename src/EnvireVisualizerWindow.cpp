@@ -138,16 +138,23 @@ QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
   
 void EnvireVisualizerWindow::redraw()
 {
+    std::lock_guard<std::mutex> lock(redrawMutex);
     if(visualzier)
     {
         visualzier->redraw();
     }
+    
     if(graph)
     {
         view2D->displayGraph(*(graph.get()));
     }
 }
 
+void EnvireVisualizerWindow::closeEvent(QCloseEvent *event)
+{
+    event->accept();
+    emit widgetClosed();
+}
   
 void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
