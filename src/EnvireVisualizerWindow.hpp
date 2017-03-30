@@ -72,7 +72,6 @@ public:
       
     /**Create an unitialized envire visualizer that displays nothing.*/
     EnvireVisualizerWindow();
-    ~EnvireVisualizerWindow();
 
     /**called whenever some edge in the graph changes */
     virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
