@@ -56,6 +56,7 @@ EnvireVisualizerWindow::EnvireVisualizerWindow(): QMainWindow(), GraphEventDispa
 window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
 firstTimeDisplayingItems(true)
 {
+  numUpdates = 0;
   window->setupUi(this);
   vizkit3dWidget = new vizkit3d::Vizkit3DWidget;
   tableViewItems = new QTableView(vizkit3dWidget);
@@ -100,6 +101,13 @@ QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
   tableViewItems->setModel(&currentItems);//tableView will not take ownership
   tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
 
+  
+  statusBar = new QStatusBar();
+  setStatusBar(statusBar);
+  statusBar->showMessage("test");
+  
+  lastStatisticTime = std::chrono::system_clock::now();
+  
   connect(vizkit3dWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(vizkit3dWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
@@ -128,12 +136,6 @@ QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
   window->actionSave_Graph->setEnabled(false);
   window->actionAdd_Item->setEnabled(false);
   
-//   setCentralWidget(new vizkit3d::Vizkit3DWidget());
-  
-  
-  std::cout << "WIDGET: " << vizkit3dWidget << std::endl;
-  
-  
 }
   
 void EnvireVisualizerWindow::redraw()
@@ -148,6 +150,8 @@ void EnvireVisualizerWindow::redraw()
     {
         view2D->displayGraph(*(graph.get()));
     }
+    
+    QMetaObject::invokeMethod(this, "showStatistics", Qt::QueuedConnection);  //redraw might be called from any thread
 }
 
 void EnvireVisualizerWindow::closeEvent(QCloseEvent *event)
@@ -394,15 +398,17 @@ void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& new
 
 void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
 {
-  if(ignoreEdgeModifiedEvent)
-    return;
-  const QString origin = QString::fromStdString(e.origin);
-  const QString target = QString::fromStdString(e.target);
-  //need to invoke because the graph might have been modified from a different
-  //thread
-  const Qt::ConnectionType conType = Qt::QueuedConnection;//Helpers::determineConnectionType(this);
-  QMetaObject::invokeMethod(this, "edgeModifiedInternal", conType,
-                            Q_ARG(QString, origin), Q_ARG(QString, target));  
+    ++numUpdates;
+    
+    if(ignoreEdgeModifiedEvent)
+        return;
+    const QString origin = QString::fromStdString(e.origin);
+    const QString target = QString::fromStdString(e.target);
+    //need to invoke because the graph might have been modified from a different
+    //thread
+    const Qt::ConnectionType conType = Qt::QueuedConnection;//Helpers::determineConnectionType(this);
+    QMetaObject::invokeMethod(this, "edgeModifiedInternal", conType,
+                              Q_ARG(QString, origin), Q_ARG(QString, target));  
 }
 
 void EnvireVisualizerWindow::edgeModifiedInternal(const QString& originFrame, const QString& targetFrame)
@@ -542,7 +548,27 @@ void EnvireVisualizerWindow::addItem()
 void EnvireVisualizerWindow::itemClicked(const QModelIndex & index)
 {
   ItemBase::Ptr item = currentItems.getItem(index);
+ 
   itemManipulator->itemSelected(item, graph, visualzier->getTree());
+}
+
+void EnvireVisualizerWindow::showStatistics()
+{
+    const auto now = std::chrono::system_clock::now();
+    if(graph)
+    {
+        const double t = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastStatisticTime).count();
+        const double updatesSec = double(numUpdates) / (t / 1000.0);
+        
+//         statusBar->showMessage(QString("Frames: ") + QString::number(graph->num_vertices()) + QString(", Modifies/Sec: ") + QString::number(updatesSec));
+        statusBar->showMessage(QString("Frames: ") + QString::number(graph->num_vertices()) +
+                               QString(", Total Updates: ") + QString::number(numUpdates) +
+                               QString(", Updates/Sec: ") + QString::number(updatesSec));
+    }
+    else
+    {
+        statusBar->showMessage("No Graph");
+    }
 }
 
 

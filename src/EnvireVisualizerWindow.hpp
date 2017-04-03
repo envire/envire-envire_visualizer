@@ -34,6 +34,7 @@
 #include <envire_core/graph/GraphTypes.hpp>
 #include <unordered_map>
 #include <mutex>
+#include <chrono>
 
 class QTableView;
 class QTreeView;
@@ -132,6 +133,8 @@ private slots:
     /**Invoked whenever the user clicks on an item */
     void itemClicked(const QModelIndex & index);
   
+    void showStatistics();
+    
 signals:
     /**emitted when the widget is closed */
     void widgetClosed();
@@ -146,6 +149,7 @@ private:
   
     /**selects the frame named @p name in the 2d listview and 3d window */
     void selectFrame(const QString& name);
+    
 
     std::shared_ptr<Ui::MainWindow> window;
     std::shared_ptr<envire::core::EnvireGraph> graph;
@@ -165,9 +169,13 @@ private:
     QTableView* tableViewItems;
     QTreeView* treeViewSelectedFrame;
     QListWidget* listWidgetFrames;
+    QStatusBar* statusBar;
 
     std::mutex redrawMutex;
   
+    std::chrono::system_clock::time_point lastStatisticTime;
+    size_t numUpdates;
+    
 };
   
   
