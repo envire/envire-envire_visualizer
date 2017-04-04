@@ -54,6 +54,8 @@ void Vizkit3dPluginInformation::loadData()
       delete plugin;
     }
   }
+  
+  delete availablePlugins;
 }
 
 void Vizkit3dPluginInformation::loadPluginData(const QObject* plugin,
