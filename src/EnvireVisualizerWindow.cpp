@@ -35,6 +35,8 @@
 #include "AddItemDialog.hpp"
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/events/EdgeEvents.hpp>
+#include <envire_core/graph/GraphDrawing.hpp>
+
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QTreeView>
@@ -148,7 +150,13 @@ void EnvireVisualizerWindow::redraw()
     
     if(graph)
     {
-        view2D->displayGraph(*(graph.get()));
+        std::stringstream stream;
+        GraphDrawing::writeSVG(*graph, stream);
+        
+        
+        const QString svgStr = QString::fromStdString(stream.str());
+        QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
+                            Q_ARG(QString, svgStr));  
     }
     
     QMetaObject::invokeMethod(this, "showStatistics", Qt::QueuedConnection);  //redraw might be called from any thread
@@ -177,7 +185,6 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
     this->graph->unsubscribe(this);
   }
   this->graph = graph;
-  view2D->displayGraph(*(this->graph.get()));
   this->graph->subscribe(this);
   
   //reset the widget because this might not be the first time the user loads a graph
@@ -366,7 +373,6 @@ void EnvireVisualizerWindow::frameNameAdded(const QString& name)
 {
     std::cout << "ADDED: " << name.toStdString() << std::endl;
   listWidgetFrames->addItem(name);
-  view2D->displayGraph(*(this->graph.get()));
 }
 
 void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
@@ -374,7 +380,6 @@ void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
   QList<QListWidgetItem*> items = listWidgetFrames->findItems(name, Qt::MatchExactly);
   assert(items.size() == 1); //the frame ids are unique and should not be in the list more than once
   delete items.first(); //this will remove the item from the listWidget
-  view2D->displayGraph(*(this->graph.get()));
 }
 
 void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& newValue)
@@ -392,8 +397,6 @@ void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& new
   ignoreEdgeModifiedEvent = true;
   graph->updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
   ignoreEdgeModifiedEvent = false;
-  view2D->displayGraph(*(this->graph.get()));
-  
 }
 
 void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
@@ -526,7 +529,6 @@ void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVe
 void EnvireVisualizerWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
 {
   internalFrameMoving(frame, trans, rot, true);
-  view2D->displayGraph(*(this->graph.get()));
 }
 
 void EnvireVisualizerWindow::frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
