@@ -151,12 +151,11 @@ void EnvireVisualizerWindow::redraw()
     if(graph)
     {
         std::stringstream stream;
-        GraphDrawing::writeSVG(*graph, stream);
+        GraphDrawing::write(*graph, stream);
         
-        
-        const QString svgStr = QString::fromStdString(stream.str());
+        const QString dotStr = QString::fromStdString(stream.str());
         QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
-                            Q_ARG(QString, svgStr));  
+                            Q_ARG(QString, dotStr));  
     }
     
     QMetaObject::invokeMethod(this, "showStatistics", Qt::QueuedConnection);  //redraw might be called from any thread
