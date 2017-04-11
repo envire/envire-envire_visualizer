@@ -67,7 +67,7 @@ firstTimeDisplayingItems(true)
   
   window->tabWidget->addTab(vizkit3dWidget, "3D View");
   
-  view2D = new EnvireGraph2DStructurWidget();
+  view2D = new EnvireGraph2DStructurWidget(1000);
   addItemDialog = new AddItemDialog(this); 
   itemManipulator = new ItemManipulatorWidget(this);
   
@@ -81,7 +81,7 @@ firstTimeDisplayingItems(true)
   QDockWidget* selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
   selectedFrameDock->setWidget(treeViewSelectedFrame);
   
-QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
+  QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
   framesDock->setWidget(listWidgetFrames);
   
   
