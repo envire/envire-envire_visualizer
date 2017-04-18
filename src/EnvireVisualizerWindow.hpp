@@ -175,6 +175,7 @@ private:
   
     std::chrono::system_clock::time_point lastStatisticTime;
     size_t numUpdates;
+    size_t totalNumUpdates;
     
 };
   

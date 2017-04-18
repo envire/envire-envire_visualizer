@@ -59,6 +59,7 @@ window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
 firstTimeDisplayingItems(true)
 {
   numUpdates = 0;
+  totalNumUpdates = 0;
   window->setupUi(this);
   vizkit3dWidget = new vizkit3d::Vizkit3DWidget;
   tableViewItems = new QTableView(vizkit3dWidget);
@@ -559,12 +560,17 @@ void EnvireVisualizerWindow::showStatistics()
     if(graph)
     {
         const double t = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastStatisticTime).count();
-        const double updatesSec = double(numUpdates) / (t / 1000.0);
         
-//         statusBar->showMessage(QString("Frames: ") + QString::number(graph->num_vertices()) + QString(", Modifies/Sec: ") + QString::number(updatesSec));
-        statusBar->showMessage(QString("Frames: ") + QString::number(graph->num_vertices()) +
-                               QString(", Total Updates: ") + QString::number(numUpdates) +
-                               QString(", Updates/Sec: ") + QString::number(updatesSec));
+        if(t >= 1000)
+        {
+            const double updatesSec = double(numUpdates) / t * 1000.0;
+            totalNumUpdates += numUpdates;
+            statusBar->showMessage(QString("Frames: ") + QString::number(graph->num_vertices()) +
+                                   QString(", Total Updates: ") + QString::number(totalNumUpdates) +
+                                   QString(", Updates/Sec: ") + QString::number(updatesSec));
+            numUpdates = 0; //should be locked but dont care because it is not important of we lose one or two updates
+            lastStatisticTime = now;
+        }
     }
     else
     {
