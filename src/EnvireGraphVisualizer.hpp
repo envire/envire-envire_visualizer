@@ -39,7 +39,7 @@
 #include <memory>
 #include <unordered_map>
 #include <mutex>
-#include "Vizkit3dPluginInformation.hpp"
+#include <vizkit3d_plugin_information/Vizkit3dPluginInformation.hpp>
 
 namespace envire { namespace core 
 {
@@ -63,11 +63,11 @@ public:
   EnvireGraphVisualizer(std::shared_ptr<envire::core::EnvireGraph> graph,
                         vizkit3d::Vizkit3DWidget* widget, 
                         const envire::core::FrameId& rootNode,
-                        std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
+                        std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos);
   
     /**Allows for lazy initialization */
     EnvireGraphVisualizer(vizkit3d::Vizkit3DWidget* widget,
-                          std::shared_ptr<Vizkit3dPluginInformation> pluginInfos);
+                          std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos);
     
     /** (re)-initializes the visualizer. Use this method to change the displayed
      *  graph*/
@@ -143,7 +143,7 @@ private:
   std::shared_ptr<envire::core::EnvireGraph> graph; /**< the graph that is visualized*/
   envire::core::TreeView tree;
   vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
-  std::shared_ptr<Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
+  std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
   ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
   QSet<QString> frameNames; //contains the names of all frames in the current tree
   bool initialized;

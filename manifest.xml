@@ -33,4 +33,5 @@
   <depend package="envire/envire_pcl" />
   <depend package="envire/envire_smurf" />
   <depend package="gui/vizkit3d" />
+  <depend package="gui/vizkit3d_plugin_information" />  
 </package>

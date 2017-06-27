@@ -40,13 +40,13 @@ using namespace vizkit3d;
 
 namespace envire { namespace viz 
 {
-using TypeToUpdateMapping = Vizkit3dPluginInformation::TypeToUpdateMapping;  
+using TypeToUpdateMapping = vizkit3d::Vizkit3dPluginInformation::TypeToUpdateMapping;  
 
   
 EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::EnvireGraph> graph,
                                              Vizkit3DWidget* widget, 
                                              const FrameId& rootNode,
-                                             std::shared_ptr<Vizkit3dPluginInformation> pluginInfos) :
+                                             std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos) :
     GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos),
     initialized(false)
 { 

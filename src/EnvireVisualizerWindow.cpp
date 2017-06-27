@@ -29,7 +29,7 @@
 #include "EnvireGraphVisualizer.hpp"
 #include "TransformModel.hpp"
 #include "Helpers.hpp" 
-#include "Vizkit3dPluginInformation.hpp"
+#include <vizkit3d_plugin_information/Vizkit3dPluginInformation.hpp>
 #include "DoubleSpinboxItemDelegate.hpp"
 #include "AddTransformDialog.hpp"
 #include "AddItemDialog.hpp"
@@ -128,7 +128,7 @@ firstTimeDisplayingItems(true)
   connect(tableViewItems, SIGNAL(clicked(const QModelIndex&)), this,
           SLOT(itemClicked(const QModelIndex&)));
   
-  pluginInfos.reset(new Vizkit3dPluginInformation(vizkit3dWidget));
+  pluginInfos.reset(new vizkit3d::Vizkit3dPluginInformation(vizkit3dWidget));
   
   //disable everything until a graph is loaded
   treeViewSelectedFrame->setEnabled(false);

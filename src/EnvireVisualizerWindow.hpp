@@ -48,6 +48,7 @@ namespace Ui
 namespace vizkit3d
 {
     class Vizkit3DWidget;
+    class Vizkit3dPluginInformation;
 }
 
 
@@ -61,7 +62,6 @@ namespace envire { namespace viz
 {
   
 class EnvireGraphVisualizer;
-class Vizkit3dPluginInformation;
 class EnvireGraph2DStructurWidget;
 class AddItemDialog;
 class ItemManipulatorWidget;
@@ -154,7 +154,7 @@ private:
     std::shared_ptr<Ui::MainWindow> window;
     std::shared_ptr<envire::core::EnvireGraph> graph;
     std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
-    std::shared_ptr<Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
+    std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
     QString selectedFrame;//currently selected frame, empty if none
     QString rootFrame;//the root frame of the displayed tree
     TransformModel currentTransform;//model of the currently selected transform

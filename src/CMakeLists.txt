@@ -10,7 +10,7 @@ rock_library(envire_visualizer
                      AddItemDialog.hpp
                      ItemTableModel.hpp
                      ItemManipulatorWidget.hpp
-             HEADERS Vizkit3dPluginInformation.hpp
+             HEADERS 
                      Helpers.hpp
                      EnvireVisualizerWindow.hpp
                      EnvireGraphVisualizer.hpp
@@ -23,7 +23,6 @@ rock_library(envire_visualizer
                      ItemManipulatorWidget.hpp
                      ${SOURCES_UI_H}
              SOURCES EnvireGraphVisualizer.cpp
-                     Vizkit3dPluginInformation.cpp
                      TransformModel.cpp
                      DoubleSpinboxItemDelegate.cpp
                      AddTransformDialog.cpp
@@ -38,7 +37,7 @@ rock_library(envire_visualizer
                      additemdialog.ui
              DEPS envire_visualizer_pcl_plugin
                   envire_visualizer_smurf_plugin
-             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget
+             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information
              DEPS_PKGCONFIG base-lib)    
              
 rock_executable(envire_visualizer_bin
