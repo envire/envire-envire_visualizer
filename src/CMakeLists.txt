@@ -37,7 +37,7 @@ rock_library(envire_visualizer
                      additemdialog.ui
              DEPS envire_visualizer_pcl_plugin
                   envire_visualizer_smurf_plugin
-             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information
+             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information QtCore
              DEPS_PKGCONFIG base-lib)    
              
 rock_executable(envire_visualizer_bin
