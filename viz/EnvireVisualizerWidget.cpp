@@ -88,6 +88,7 @@ void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& v
             //FIXME the user should be able to choose the root node
             //FIXME reinitializing every time is probably really expensive
             p->visualizer->init(p->graph, root);
+            p->visualizer->redraw();
         }
     }
 }
