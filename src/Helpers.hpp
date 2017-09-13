@@ -50,7 +50,7 @@ public:
    /**Returns the connection type that should be used to invoke a blocking method on @p obj.
    * I.e. if @p obj lives in the current thread it will return DirectConnection, otherwise
    * BlockingQueuedConnection will be returned*/
-  static Qt::ConnectionType determineConnectionType(QObject* obj)
+  static Qt::ConnectionType determineBlockingConnectionType(QObject* obj)
   {
     if(QThread::currentThread() == obj->thread())
     {

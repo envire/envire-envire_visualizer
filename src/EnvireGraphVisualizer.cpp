@@ -112,7 +112,7 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
 void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)
 {
   const QString targetId = QString::fromStdString(graph->getFrameId(target));
-  Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+  Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
   QMetaObject::invokeMethod(widget, "removeFrame", conType, Q_ARG(QString, targetId));
   
   removeFrameName(QString::fromStdString(graph->getFrameId(target)));
@@ -160,7 +160,7 @@ void EnvireGraphVisualizer::clearItemVisuals()
 void EnvireGraphVisualizer::removeItemPlugin(VizPluginBase* itemViz)
 {
     ASSERT_NOT_NULL(itemViz);
-    Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+    Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
     QMetaObject::invokeMethod(widget, "removePlugin", conType, Q_ARG(QObject*, itemViz));
 }
 
@@ -217,7 +217,7 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
   {
     const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
     QObject* plugin = nullptr;
-    const Qt::ConnectionType conType = Helpers::determineConnectionType(widget);
+    const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
     QMetaObject::invokeMethod(widget, "loadPlugin", conType,
                               Q_RETURN_ARG(QObject*, plugin),
                               Q_ARG(QString, info.libName), Q_ARG(QString, ""));
@@ -225,13 +225,18 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
     VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
     ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
     
-    //call the updateData method
-    it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
-    
     const QString qFrame = QString::fromStdString(item->getFrame());
-    vizPlugin->setVisualizationFrame(qFrame);
+    
+    //needs to be invoked because setting the data frame while rendering crashes vizkit3d
+    QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
+                            Q_ARG(QString, qFrame));
     
     itemVisuals[item->getID()] = vizPlugin;
+    
+    //call the updateData method
+    //NOTE cannot use non blocking calls because qt does not know how to handle the raw datatypes
+    it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
+    
     
     LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
   }
