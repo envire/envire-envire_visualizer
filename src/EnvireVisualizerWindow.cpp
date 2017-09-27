@@ -511,7 +511,10 @@ void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVe
       tf.transform.translation = tf.transform.orientation * translation + tf.transform.translation;
       
       if(finished)
+      {
         graph->updateTransform(parentVertex, movedVertex, tf);
+        redraw();
+      }
       
       updateDisplayedTransform(parentVertex, movedVertex, tf.transform);
     }
