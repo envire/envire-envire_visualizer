@@ -31,7 +31,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <envire_core/items/Item.hpp>
-#include <envire_smurf/Visual.hpp>
+#include <smurf/Visual.hpp>
 #include <envire_smurf/GraphLoader.hpp>
 #include <smurf/Robot.hpp>
 #include "SmurfWidget.hpp"
@@ -42,7 +42,7 @@ namespace envire { namespace viz
     
 SmurfItemFactory::SmurfItemFactory()
 {
-  envire::core::Item<envire::smurf::Visual> item;
+  envire::core::Item<::smurf::Visual> item;
   supportedTypes.emplace_back(*(item.getTypeInfo()));
 }
 
