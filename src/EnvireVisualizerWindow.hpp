@@ -84,6 +84,8 @@ public:
 
     /**Returns a shared_ptr to the currently displayed graph */
     std::shared_ptr<envire::core::EnvireGraph> getGraph() const;
+
+    vizkit3d::Vizkit3DWidget* getWidget() { return vizkit3dWidget; }
   
   
 public slots:
