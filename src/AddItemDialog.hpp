@@ -28,7 +28,9 @@
 #include <QDialog>
 #include "ui_additemdialog.h"
 #include <memory>
+#ifndef Q_MOC_RUN
 #include "plugins/ItemFactoryInterface.hpp"
+#endif
 #include <type_traits>
 
 namespace envire { namespace core {
