@@ -30,7 +30,7 @@
 #include <QMainWindow> 
 #include <QListWidgetItem>
 #include <memory>
-#ifndef Q_MOC_RUN
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
 #endif
