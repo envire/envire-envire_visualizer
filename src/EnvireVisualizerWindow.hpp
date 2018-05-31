@@ -30,8 +30,10 @@
 #include <QMainWindow> 
 #include <QListWidgetItem>
 #include <memory>
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <envire_core/events/GraphEventDispatcher.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
+#endif
 #include <unordered_map>
 #include <mutex>
 #include <chrono>

@@ -25,9 +25,11 @@
 //
 
 #pragma once
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <envire_core/items/ItemBase.hpp>
 #include <envire_core/graph/EnvireGraph.hpp>
 #include <envire_core/graph/TreeView.hpp>
+#endif
 class QWidget;
 
 

@@ -27,6 +27,7 @@
 #pragma once
 #include <unordered_map>
 #include <typeindex>
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <vizkit3d/Vizkit3DWidget.hpp>
 #include <envire_core/graph/GraphTypes.hpp>
@@ -36,10 +37,13 @@
 #include <envire_core/items/Transform.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <boost/functional/hash.hpp>
+#endif
 #include <memory>
 #include <unordered_map>
 #include <mutex>
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <vizkit3d_plugin_information/Vizkit3dPluginInformation.hpp>
+#endif
 
 namespace envire { namespace core 
 {

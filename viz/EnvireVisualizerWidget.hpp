@@ -27,10 +27,14 @@
 #ifndef envire_visualizer_EnvireVisualizerWidget_H
 #define envire_visualizer_EnvireVisualizerWidget_H
 
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <boost/noncopyable.hpp>
+#endif
 #include <vizkit3d/Vizkit3DPlugin.hpp>
 #include <osg/Geode>
+#if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
 #include <envire_core/graph/EnvireGraph.hpp>
+#endif
 
 namespace vizkit3d
 {
