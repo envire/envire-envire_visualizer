@@ -38,10 +38,15 @@ rock_library(envire_visualizer
              DEPS envire_visualizer_pcl_plugin
                   envire_visualizer_smurf_plugin
              DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information QtCore
-             DEPS_PKGCONFIG base-lib)    
-             
+             DEPS_PKGCONFIG base-lib)
+
+rock_library(envire_visualizer_interface
+             HEADERS EnvireVisualizerInterface.hpp
+             SOURCES EnvireVisualizerInterface.cpp
+             LIBS envire_visualizer)
+
 rock_executable(envire_visualizer_bin
                 SOURCES VisualizerMain.cpp
                 DEPS envire_visualizer
 )
-             
+
