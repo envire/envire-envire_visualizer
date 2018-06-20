@@ -88,6 +88,10 @@ public:
     std::shared_ptr<envire::core::EnvireGraph> getGraph() const;
 
     vizkit3d::Vizkit3DWidget* getWidget() { return vizkit3dWidget; }
+
+    std::shared_ptr<EnvireGraphVisualizer> getVisualizer(){
+        return visualzier;
+    }
   
   
 public slots:

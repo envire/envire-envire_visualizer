@@ -1,7 +1,9 @@
 #include "EnvireVisualizerInterface.hpp"
 #include "EnvireVisualizerWindow.hpp"
+#include "EnvireGraphVisualizer.hpp"
 #include <QApplication>
 #include <memory>
+#include <envire_core/events/GraphEventDispatcher.hpp>
 
 using namespace envire::core;
 using namespace envire::viz;
@@ -12,10 +14,34 @@ struct DontDeleteGraph // deleter that can be passed to std::shared_ptr ctor
 };
 
 
-class EnvireVisualizerImpl
+struct ItemCallbackSubscriber : public GraphEventDispatcher
+{
+    ItemCallbackSubscriber(EnvireGraph& graph, FrameId targetFrame, EnvireVisualizerInterfaceCallbackReceiver* parent) : 
+      GraphEventDispatcher(&graph),
+      targetFrame(targetFrame),
+      parent(parent){}
+
+    virtual void itemAdded(const envire::core::ItemAddedEvent& event)
+    {
+        parent->itemAdded(event);
+    }
+    
+    virtual void itemRemoved(const envire::core::ItemRemovedEvent& event)
+    {
+        parent->itemRemoved(event);
+    }
+
+    FrameId targetFrame;
+    EnvireVisualizerInterfaceCallbackReceiver* parent;
+    
+};
+
+
+class EnvireVisualizerImpl: public EnvireVisualizerInterfaceCallbackReceiver
 {
     EnvireVisualizerWindow window;
     EnvireGraph* graph;
+    boost::shared_ptr<ItemCallbackSubscriber> subscriber;
 public:
     EnvireVisualizerImpl() : graph(0)
     {
@@ -30,6 +56,7 @@ public:
         this->graph = &graph;
         std::shared_ptr<EnvireGraph> graphPtr(&graph, DontDeleteGraph());
         window.displayGraph(graphPtr, QString::fromStdString(base));
+        subscriber = boost::shared_ptr<ItemCallbackSubscriber> (new ItemCallbackSubscriber(graph, base, this));
     }
 
     void redraw()
@@ -45,16 +72,21 @@ public:
             QApplication::instance(), SLOT(quit()));
     }
 
-    void itemAdded(const envire::core::ItemAddedEvent& e)
+    virtual void itemAdded(const envire::core::ItemAddedEvent& e)
     {
-        e.item->connectContentsChangedCallback(
-            [&](const ItemBase& item){ redraw(); });
+          //e.item->connectContentsChangedCallback([&](ItemBase& item){ redraw(););
+          e.item->connectContentsChangedCallback([&](ItemBase& item){updateViz(item);});
     }
 
-    void itemRemoved(const envire::core::ItemRemovedEvent& e)
+    virtual void itemRemoved(const envire::core::ItemRemovedEvent& e)
     {
         // cannot remove lambda function
     }
+
+    void updateViz(ItemBase& item){
+        window.getVisualizer()->updateVisual(item);
+    }
+
 };
 
 
@@ -83,12 +115,12 @@ void EnvireVisualizerInterface::show()
     impl->show();
 }
 
-void EnvireVisualizerInterface::itemAdded(const envire::core::ItemAddedEvent& e)
-{
-    impl->itemAdded(e);
-}
+// void EnvireVisualizerInterface::itemAdded(const envire::core::ItemAddedEvent& e)
+// {
+//     impl->itemAdded(e);
+// }
 
-void EnvireVisualizerInterface::itemRemoved(const envire::core::ItemRemovedEvent& e)
-{
-    impl->itemRemoved(e);
-}
+// void EnvireVisualizerInterface::itemRemoved(const envire::core::ItemRemovedEvent& e)
+// {
+//     impl->itemRemoved(e);
+// }
