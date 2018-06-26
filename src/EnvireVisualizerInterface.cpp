@@ -8,6 +8,9 @@
 using namespace envire::core;
 using namespace envire::viz;
 
+//To use the envire::core::ItemBase::Ptr in signal/slot conenctions, we need to register the (typedef) type
+Q_DECLARE_METATYPE(envire::core::ItemBase::Ptr)
+
 struct DontDeleteGraph // deleter that can be passed to std::shared_ptr ctor
 {
     void operator()(EnvireGraph* graph) {}
@@ -45,9 +48,10 @@ class EnvireVisualizerImpl: public EnvireVisualizerInterfaceCallbackReceiver
 public:
     EnvireVisualizerImpl() : graph(0)
     {
+        qRegisterMetaType<envire::core::ItemBase::Ptr>("envire::core::ItemBase::Ptr");
     }
 
-    ~EnvireVisualizerImpl(){
+    virtual ~EnvireVisualizerImpl(){
         graph = NULL;
     }
 
@@ -84,7 +88,10 @@ public:
     }
 
     void updateViz(ItemBase& item){
-        window.getVisualizer()->updateVisual(item);
+        //update item through invoke to make the update thread save (happens in QT main Loop)
+        //calls the slot without connection
+        envire::core::ItemBase::Ptr itemptr = item.clone(true,true);
+        QMetaObject::invokeMethod( window.getVisualizer().get(), "updateVisual", Q_ARG( envire::core::ItemBase::Ptr, itemptr ) );
     }
 
 };
@@ -114,13 +121,3 @@ void EnvireVisualizerInterface::show()
     // TODO make sure graph is initialized?
     impl->show();
 }
-
-// void EnvireVisualizerInterface::itemAdded(const envire::core::ItemAddedEvent& e)
-// {
-//     impl->itemAdded(e);
-// }
-
-// void EnvireVisualizerInterface::itemRemoved(const envire::core::ItemRemovedEvent& e)
-// {
-//     impl->itemRemoved(e);
-// }
