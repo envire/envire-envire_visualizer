@@ -201,7 +201,7 @@ void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
     return;
   }
 
-  updateVisual(*item);
+  updateVisual(item);
 }
 
 void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
@@ -260,9 +260,9 @@ void EnvireGraphVisualizer::redraw()
   }
 }
 
-void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase& item){
+void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
 
-  const std::string parameterType = ItemMetadataMapping::getMetadata(*item.getTypeInfo()).embeddedTypename;
+  const std::string parameterType = ItemMetadataMapping::getMetadata(*item->getTypeInfo()).embeddedTypename;
   const QString qParameterType = QString::fromStdString(parameterType);
   const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos->getTypeToUpdateMethodMapping();
   const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
@@ -281,7 +281,7 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase& item){
     const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
     
 
-    VizPluginBase* vizPlugin = itemVisuals[item.getID()];
+    VizPluginBase* vizPlugin = itemVisuals[item->getID()];
     //check if plugin already loaded, if not ty to
     if (!vizPlugin){
       QObject* plugin = nullptr;
@@ -293,14 +293,14 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase& item){
       vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
       ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
       
-      const QString qFrame = QString::fromStdString(item.getFrame());
+      const QString qFrame = QString::fromStdString(item->getFrame());
       
       //needs to be invoked because setting the data frame while rendering crashes vizkit3d
       QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
                               Q_ARG(QString, qFrame));
       
-      itemVisuals[item.getID()] = vizPlugin;
-      LOG(INFO) << "Added item " << item.getIDString() << " using vizkit plugin " << info.libName.toStdString();
+      itemVisuals[item->getID()] = vizPlugin;
+      LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
 
     }else{
 
@@ -308,13 +308,13 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase& item){
     //call the updateData method
     //NOTE cannot use non blocking calls because qt does not know how to handle the raw datatypes
     //std::cout << "try updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << std::endl;
-    const void* raw = item.getRawData();
+    const void* raw = item->getRawData();
     
     if (raw != nullptr){
       //std::cout << "updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
-      it->method.invoke(vizPlugin, conType, QGenericArgument(parameterType.c_str(), raw));
+      it->method.invoke(vizPlugin, QGenericArgument(parameterType.c_str(), raw));
     }else{
-      LOG(WARNING) << "updating item visual failed: NULL item: " << demangledTypeName(item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
+      LOG(WARNING) << "updating item visual failed: NULL item: " << demangledTypeName(*item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
     }
     
     
