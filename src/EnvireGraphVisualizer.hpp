@@ -92,6 +92,8 @@ public slots:
      *       redrawing.
      */ 
     void redraw();
+
+    void updateVisual(envire::core::ItemBase::Ptr item);
   
 protected:
   /**Is invoked whenever a transform changes in the graph */

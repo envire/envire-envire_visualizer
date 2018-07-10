@@ -187,63 +187,21 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 
 void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
 {
-  LOG(INFO) << "Loading Visualizer for item: " << item->getIDString();  
+  LOG(INFO) << "Loading Visualizer for item: " << item->getIDString() << " of type " << demangledTypeName(*item);  
   if(itemVisuals.find(item->getID()) != itemVisuals.end())
   {
     LOG(ERROR) << "Ignoring item " << item->getIDString() << ". It already has a visual.";
     return;
   }
-  
+
   const bool hasMetadata = ItemMetadataMapping::containsMetadata(*(item->getTypeInfo()));
   if(!hasMetadata)
   {
     LOG(ERROR) << "Ignoring item " << item->getIDString() << ". No metadata available. This usually means that the type was not loaded using envire plugins";
     return;
   }
-  const std::string parameterType = ItemMetadataMapping::getMetadata(*(item->getTypeInfo())).embeddedTypename;
-  const QString qParameterType = QString::fromStdString(parameterType);
-  const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos->getTypeToUpdateMethodMapping();
-  
-  TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
-  
-  if(typeToUpdateMethod.count(qParameterType) > 1)
-  {
-    LOG(WARNING) << "Multiple update methods registered for type " 
-                  << parameterType << ". Using the most recently added one from: "
-                  << it->libName.toStdString();
-  }
-  
-  if(it != typeToUpdateMethod.end())
-  {
-    const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
-    QObject* plugin = nullptr;
-    const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
-    QMetaObject::invokeMethod(widget, "loadPlugin", conType,
-                              Q_RETURN_ARG(QObject*, plugin),
-                              Q_ARG(QString, info.libName), Q_ARG(QString, ""));
-    ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
-    VizPluginBase* vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
-    ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
-    
-    const QString qFrame = QString::fromStdString(item->getFrame());
-    
-    //needs to be invoked because setting the data frame while rendering crashes vizkit3d
-    QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
-                            Q_ARG(QString, qFrame));
-    
-    itemVisuals[item->getID()] = vizPlugin;
-    
-    //call the updateData method
-    //NOTE cannot use non blocking calls because qt does not know how to handle the raw datatypes
-    it->method.invoke(plugin, conType, QGenericArgument(parameterType.c_str(), item->getRawData()));
-    
-    
-    LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
-  }
-  else
-  {
-    LOG(WARNING) << "No visualizer found for item type " << parameterType;
-  }  
+
+  updateVisual(item);
 }
 
 void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
@@ -302,7 +260,71 @@ void EnvireGraphVisualizer::redraw()
   }
 }
 
+void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
 
+  const std::string parameterType = ItemMetadataMapping::getMetadata(*item->getTypeInfo()).embeddedTypename;
+  const QString qParameterType = QString::fromStdString(parameterType);
+  const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos->getTypeToUpdateMethodMapping();
+  const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
+
+  TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
+  
+  if(typeToUpdateMethod.count(qParameterType) > 1)
+  {
+    LOG(WARNING) << "Multiple update methods registered for type " 
+                  << parameterType << ". Using the most recently added one from: "
+                  << it->libName.toStdString();
+  }
+  
+  if(it != typeToUpdateMethod.end())
+  {
+    const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
+    
+
+    VizPluginBase* vizPlugin = itemVisuals[item->getID()];
+    //check if plugin already loaded, if not ty to
+    if (!vizPlugin){
+      QObject* plugin = nullptr;
+      
+      QMetaObject::invokeMethod(widget, "loadPlugin", conType,
+                                Q_RETURN_ARG(QObject*, plugin),
+                                Q_ARG(QString, info.libName), Q_ARG(QString, ""));
+      ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
+      vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
+      ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
+      
+      const QString qFrame = QString::fromStdString(item->getFrame());
+      
+      //needs to be invoked because setting the data frame while rendering crashes vizkit3d
+      QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
+                              Q_ARG(QString, qFrame));
+      
+      itemVisuals[item->getID()] = vizPlugin;
+      LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
+
+    }else{
+
+    }
+    //call the updateData method
+    //NOTE cannot use non blocking calls because qt does not know how to handle the raw datatypes
+    //std::cout << "try updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << std::endl;
+    const void* raw = item->getRawData();
+    
+    if (raw != nullptr){
+      //std::cout << "updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
+      it->method.invoke(vizPlugin, QGenericArgument(parameterType.c_str(), raw));
+    }else{
+      LOG(WARNING) << "updating item visual failed: NULL item: " << demangledTypeName(*item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
+    }
+    
+    
+  }
+  else
+  {
+    LOG(WARNING) << "No visualizer found for item type " << parameterType;
+  }  
+
+}
 
 const QSet<QString>& EnvireGraphVisualizer::getFrameNames() const
 {

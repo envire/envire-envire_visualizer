@@ -1,10 +1,15 @@
 #include "EnvireVisualizerInterface.hpp"
 #include "EnvireVisualizerWindow.hpp"
+#include "EnvireGraphVisualizer.hpp"
 #include <QApplication>
 #include <memory>
+#include <envire_core/events/GraphEventDispatcher.hpp>
 
 using namespace envire::core;
 using namespace envire::viz;
+
+//To use the envire::core::ItemBase::Ptr in signal/slot conenctions, we need to register the (typedef) type
+Q_DECLARE_METATYPE(envire::core::ItemBase::Ptr)
 
 struct DontDeleteGraph // deleter that can be passed to std::shared_ptr ctor
 {
@@ -12,16 +17,41 @@ struct DontDeleteGraph // deleter that can be passed to std::shared_ptr ctor
 };
 
 
-class EnvireVisualizerImpl
+struct ItemCallbackSubscriber : public GraphEventDispatcher
+{
+    ItemCallbackSubscriber(EnvireGraph& graph, FrameId targetFrame, EnvireVisualizerInterfaceCallbackReceiver* parent) : 
+      GraphEventDispatcher(&graph),
+      targetFrame(targetFrame),
+      parent(parent){}
+
+    virtual void itemAdded(const envire::core::ItemAddedEvent& event)
+    {
+        parent->itemAdded(event);
+    }
+    
+    virtual void itemRemoved(const envire::core::ItemRemovedEvent& event)
+    {
+        parent->itemRemoved(event);
+    }
+
+    FrameId targetFrame;
+    EnvireVisualizerInterfaceCallbackReceiver* parent;
+    
+};
+
+
+class EnvireVisualizerImpl: public EnvireVisualizerInterfaceCallbackReceiver
 {
     EnvireVisualizerWindow window;
     EnvireGraph* graph;
+    boost::shared_ptr<ItemCallbackSubscriber> subscriber;
 public:
     EnvireVisualizerImpl() : graph(0)
     {
+        qRegisterMetaType<envire::core::ItemBase::Ptr>("envire::core::ItemBase::Ptr");
     }
 
-    ~EnvireVisualizerImpl(){
+    virtual ~EnvireVisualizerImpl(){
         graph = NULL;
     }
 
@@ -30,6 +60,7 @@ public:
         this->graph = &graph;
         std::shared_ptr<EnvireGraph> graphPtr(&graph, DontDeleteGraph());
         window.displayGraph(graphPtr, QString::fromStdString(base));
+        subscriber = boost::shared_ptr<ItemCallbackSubscriber> (new ItemCallbackSubscriber(graph, base, this));
     }
 
     void redraw()
@@ -45,16 +76,24 @@ public:
             QApplication::instance(), SLOT(quit()));
     }
 
-    void itemAdded(const envire::core::ItemAddedEvent& e)
+    virtual void itemAdded(const envire::core::ItemAddedEvent& e)
     {
-        e.item->connectContentsChangedCallback(
-            [&](const ItemBase& item){ redraw(); });
+          //e.item->connectContentsChangedCallback([&](ItemBase& item){ redraw(););
+          e.item->connectContentsChangedCallback([&](ItemBase& item){updateViz(item);});
     }
 
-    void itemRemoved(const envire::core::ItemRemovedEvent& e)
+    virtual void itemRemoved(const envire::core::ItemRemovedEvent& e)
     {
         // cannot remove lambda function
     }
+
+    void updateViz(ItemBase& item){
+        //update item through invoke to make the update thread save (happens in QT main Loop)
+        //calls the slot without connection
+        envire::core::ItemBase::Ptr itemptr = item.clone();
+        QMetaObject::invokeMethod( window.getVisualizer().get(), "updateVisual", Q_ARG( envire::core::ItemBase::Ptr, itemptr ) );
+    }
+
 };
 
 
@@ -81,14 +120,4 @@ void EnvireVisualizerInterface::show()
 {
     // TODO make sure graph is initialized?
     impl->show();
-}
-
-void EnvireVisualizerInterface::itemAdded(const envire::core::ItemAddedEvent& e)
-{
-    impl->itemAdded(e);
-}
-
-void EnvireVisualizerInterface::itemRemoved(const envire::core::ItemRemovedEvent& e)
-{
-    impl->itemRemoved(e);
 }
