@@ -90,7 +90,7 @@ public:
     void updateViz(ItemBase& item){
         //update item through invoke to make the update thread save (happens in QT main Loop)
         //calls the slot without connection
-        envire::core::ItemBase::Ptr itemptr = item.clone(true,true);
+        envire::core::ItemBase::Ptr itemptr = item.clone();
         QMetaObject::invokeMethod( window.getVisualizer().get(), "updateVisual", Q_ARG( envire::core::ItemBase::Ptr, itemptr ) );
     }
 
