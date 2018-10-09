@@ -80,6 +80,7 @@ public:
     {
           //e.item->connectContentsChangedCallback([&](ItemBase& item){ redraw(););
           e.item->connectContentsChangedCallback([&](ItemBase& item){updateViz(item);});
+          updateViz(*e.item);
     }
 
     virtual void itemRemoved(const envire::core::ItemRemovedEvent& e)
