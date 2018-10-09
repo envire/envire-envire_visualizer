@@ -59,17 +59,6 @@ public:
     {
         this->graph = &graph;
         std::shared_ptr<EnvireGraph> graphPtr(&graph, DontDeleteGraph());
-
-        //add callbacks for items already in the graph
-        graph.visitVertices([&](GraphTraits::vertex_descriptor vd) 
-        {
-            Frame& f = graph[graph.getFrameId(vd)];
-            f.visitItems([&](const ItemBase::Ptr& item){
-                    item->connectContentsChangedCallback([&](ItemBase& item){updateViz(item);});
-                    updateViz(*item);
-                });
-        });
-
         window.displayGraph(graphPtr, QString::fromStdString(base));
         subscriber = boost::shared_ptr<ItemCallbackSubscriber> (new ItemCallbackSubscriber(graph, base, this));
     }
