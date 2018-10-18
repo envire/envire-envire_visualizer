@@ -20,4 +20,5 @@ class EnvireVisualizerInterfaceCallbackReceiver{
     public:
     virtual void itemAdded(const envire::core::ItemAddedEvent& e) = 0;
     virtual void itemRemoved(const envire::core::ItemRemovedEvent& e) = 0;
+    virtual void edgeModified(const envire::core::EdgeModifiedEvent& e) = 0;
 };

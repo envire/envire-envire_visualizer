@@ -34,6 +34,10 @@ struct ItemCallbackSubscriber : public GraphEventDispatcher
         parent->itemRemoved(event);
     }
 
+    virtual void edgeModified(const envire::core::EdgeModifiedEvent& e) {
+        parent->edgeModified(e);
+    }
+
     FrameId targetFrame;
     EnvireVisualizerInterfaceCallbackReceiver* parent;
     
@@ -90,11 +94,16 @@ public:
     {
           //e.item->connectContentsChangedCallback([&](ItemBase& item){ redraw(););
           e.item->connectContentsChangedCallback([&](ItemBase& item){updateViz(item);});
+          updateViz(*e.item);
     }
 
     virtual void itemRemoved(const envire::core::ItemRemovedEvent& e)
     {
         // cannot remove lambda function
+    }
+
+    virtual void edgeModified(const envire::core::EdgeModifiedEvent& e){
+        redraw();
     }
 
     void updateViz(ItemBase& item){
