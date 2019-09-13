@@ -113,6 +113,10 @@ public:
         QMetaObject::invokeMethod( window.getVisualizer().get(), "updateVisual", Q_ARG( envire::core::ItemBase::Ptr, itemptr ) );
     }
 
+    EnvireVisualizerWindow& getEnvireVisualizerWindow(){
+        return window;
+    }
+
 };
 
 
@@ -139,4 +143,8 @@ void EnvireVisualizerInterface::show()
 {
     // TODO make sure graph is initialized?
     impl->show();
+}
+
+EnvireVisualizerWindow& EnvireVisualizerInterface::getEnvireVisualizerWindow(){
+    return impl->getEnvireVisualizerWindow();
 }

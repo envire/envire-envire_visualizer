@@ -3,6 +3,11 @@
 #include <envire_core/graph/EnvireGraph.hpp>
 
 class EnvireVisualizerImpl;
+namespace envire{ 
+    namespace viz{ 
+        class EnvireVisualizerWindow;
+    }
+}
 
 
 class EnvireVisualizerInterface
@@ -14,6 +19,7 @@ public:
     virtual void displayGraph(envire::core::EnvireGraph& graph, const std::string& base);
     virtual void redraw();
     void show();
+    envire::viz::EnvireVisualizerWindow& getEnvireVisualizerWindow();
 };
 
 class EnvireVisualizerInterfaceCallbackReceiver{
