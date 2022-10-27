@@ -8,5 +8,5 @@ if(NOT CMAKE_CXX_STANDARD)
 endif()
 
 rock_init(envire_visualizer 0.1)
-rock_find_qt4()
+rock_find_qt5()
 rock_standard_layout()
