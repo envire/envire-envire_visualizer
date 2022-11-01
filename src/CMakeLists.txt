@@ -1,4 +1,6 @@
-qt4_wrap_ui(SOURCES_UI_H mainwindow.ui addtransformdialog.ui additemdialog.ui)
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+qt5_wrap_ui(SOURCES_UI_H mainwindow.ui addtransformdialog.ui additemdialog.ui)
+
 add_subdirectory(plugins)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainwindow.h
 rock_library(envire_visualizer 
@@ -37,7 +39,7 @@ rock_library(envire_visualizer
                      additemdialog.ui
              DEPS envire_visualizer_pcl_plugin
                   envire_visualizer_smurf_plugin
-             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information QtCore
+             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information
              DEPS_PKGCONFIG base-lib)
 
 rock_library(envire_visualizer_interface

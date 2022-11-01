@@ -43,6 +43,9 @@
 #include <QTableView>
 #include <glog/logging.h>
 #include <QListWidget>
+#include <QDockWidget>
+#include <QHeaderView>
+#include <QFileDialog>
 #include <fstream>
 #include "envire_core/EnvireGraph2DStructurWidget.hpp"
 #include "ItemManipulatorWidget.hpp"
@@ -102,7 +105,7 @@ firstTimeDisplayingItems(true)
   treeViewSelectedFrame->setItemDelegateForRow(2, treeViewSelectedFrame->itemDelegate()); //the row delegate will take precedence over the column delegate
   listWidgetFrames->setSortingEnabled(true);
   tableViewItems->setModel(&currentItems);//tableView will not take ownership
-  tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+  tableViewItems->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 
   
   statusBar = new QStatusBar();
@@ -111,16 +114,16 @@ firstTimeDisplayingItems(true)
   
   lastStatisticTime = std::chrono::system_clock::now();
   
-  connect(vizkit3dWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
-  connect(vizkit3dWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
-          this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
-  connect(vizkit3dWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
-          this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));          
-  connect(window->actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
-  connect(window->actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
-  connect(window->actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
-  connect(window->actionSave_Graph, SIGNAL(activated(void)), this, SLOT(storeGraph()));
-  connect(window->actionAdd_Item, SIGNAL(activated(void)), this, SLOT(addItem()));
+  connect(vizkit3dWidget, &vizkit3d::Vizkit3DWidget::frameSelected, this, &EnvireVisualizerWindow::framePicked);
+  connect(vizkit3dWidget, &vizkit3d::Vizkit3DWidget::frameMoved,
+          this, &EnvireVisualizerWindow::frameMoved);          
+  connect(vizkit3dWidget, &vizkit3d::Vizkit3DWidget::frameMoving,
+          this, &EnvireVisualizerWindow::frameMoving);          
+  connect(window->actionRemove_Frame, &QAction::triggered, this, &EnvireVisualizerWindow::removeFrame);
+  connect(window->actionAdd_Frame, &QAction::triggered, this, &EnvireVisualizerWindow::addFrame);
+  connect(window->actionLoad_Graph, &QAction::triggered, this, &EnvireVisualizerWindow::loadGraph);
+  connect(window->actionSave_Graph, &QAction::triggered, this, &EnvireVisualizerWindow::storeGraph);
+  connect(window->actionAdd_Item, &QAction::triggered, this, &EnvireVisualizerWindow::addItem);
   connect(listWidgetFrames, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),

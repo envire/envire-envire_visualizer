@@ -5,6 +5,8 @@ rock_library(envire_visualizer_smurf_plugin
              HEADERS SmurfItemFactory.h
                      SmurfWidget.hpp
              SOURCES SmurfItemFactory.cpp
+             LIBS       Qt5::Core
+                        Qt5::Widgets
              DEPS_PKGCONFIG envire_core
                             envire_smurf
                             base-lib
