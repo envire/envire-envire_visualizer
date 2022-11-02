@@ -76,16 +76,16 @@ firstTimeDisplayingItems(true)
   itemManipulator = new ItemManipulatorWidget(this);
   
   
-  QDockWidget* itemDock = new QDockWidget("Items", vizkit3dWidget);
+  itemDock = new QDockWidget("Items", vizkit3dWidget);
   itemDock->setWidget(tableViewItems);
   
-  QDockWidget* itemManipulatorDock = new QDockWidget("Item Manipulator", vizkit3dWidget);
+  itemManipulatorDock = new QDockWidget("Item Manipulator", vizkit3dWidget);
   itemManipulatorDock->setWidget(itemManipulator);
   
-  QDockWidget* selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
+  selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
   selectedFrameDock->setWidget(treeViewSelectedFrame);
   
-  QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
+  framesDock = new QDockWidget("Frames", vizkit3dWidget);
   framesDock->setWidget(listWidgetFrames);
   
   
@@ -582,6 +582,22 @@ void EnvireVisualizerWindow::showStatistics()
     {
         statusBar->showMessage("No Graph");
     }
+}
+
+void EnvireVisualizerWindow::removeItemManipulatorDock() {
+    vizkit3dWidget->removeDockWidget(itemManipulatorDock);
+}
+
+void EnvireVisualizerWindow::removeItemDock() {
+    vizkit3dWidget->removeDockWidget(itemDock);
+}
+
+void EnvireVisualizerWindow::removeSelectedFrameDock() {
+    vizkit3dWidget->removeDockWidget(selectedFrameDock);
+}
+
+void EnvireVisualizerWindow::removeFramesDock() {
+    vizkit3dWidget->removeDockWidget(framesDock);
 }
 
 

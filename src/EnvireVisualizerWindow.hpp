@@ -116,6 +116,14 @@ public slots:
     * @note Only call if you know that the graph is not modifed at the same time.
     * @note Is thread safe in a sense that no two threads can call redraw at the same time*/
     void redraw();
+
+    void removeItemManipulatorDock();
+
+    void removeItemDock();
+
+    void removeSelectedFrameDock();
+
+    void removeFramesDock() ;
     
 private slots:
     void framePicked(const QString&);
@@ -178,6 +186,11 @@ private:
     QTreeView* treeViewSelectedFrame;
     QListWidget* listWidgetFrames;
     QStatusBar* statusBar;
+
+    QDockWidget* itemDock;
+    QDockWidget* itemManipulatorDock;
+    QDockWidget* selectedFrameDock;
+    QDockWidget* framesDock;
 
     std::mutex redrawMutex;
   
