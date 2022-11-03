@@ -588,19 +588,19 @@ void EnvireVisualizerWindow::showStatistics()
 }
 
 void EnvireVisualizerWindow::removeItemManipulatorDock() {
-    vizkit3dWidget->removeDockWidget(itemManipulatorDock);
+    itemManipulatorDock->close();
 }
 
 void EnvireVisualizerWindow::removeItemDock() {
-    vizkit3dWidget->removeDockWidget(itemDock);
+    itemDock->close();
 }
 
 void EnvireVisualizerWindow::removeSelectedFrameDock() {
-    vizkit3dWidget->removeDockWidget(selectedFrameDock);
+    selectedFrameDock->close();
 }
 
 void EnvireVisualizerWindow::removeFramesDock() {
-    vizkit3dWidget->removeDockWidget(framesDock);
+    framesDock->close();
 }
 
 
