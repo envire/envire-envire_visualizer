@@ -84,6 +84,12 @@ public:
   
   /**Returns a reference to the TreeView that is currently visualized. */
   const envire::core::TreeView& getTree() const;
+
+
+  vizkit3d::VizPluginBase* getVizPluginForItem(const boost::uuids::uuid &uuid) {
+    return itemVisuals[uuid];
+  }
+
   
 public slots:
     /**Get all transformation changes from the graph and redraw the graph.
