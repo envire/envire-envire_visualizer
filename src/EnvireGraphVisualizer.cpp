@@ -38,18 +38,18 @@ using namespace vizkit3d;
 
 
 
-namespace envire { namespace viz 
+namespace envire { namespace viz
 {
-using TypeToUpdateMapping = vizkit3d::Vizkit3dPluginInformation::TypeToUpdateMapping;  
+using TypeToUpdateMapping = vizkit3d::Vizkit3dPluginInformation::TypeToUpdateMapping;
 
-  
+
 EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::EnvireGraph> graph,
-                                             Vizkit3DWidget* widget, 
+                                             Vizkit3DWidget* widget,
                                              const FrameId& rootNode,
                                              std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos) :
     GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos),
     initialized(false)
-{ 
+{
     init(graph, rootNode);
 }
 
@@ -74,19 +74,19 @@ void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const Fra
         auto edgeAdded = std::bind(&EnvireGraphVisualizer::edgeAddedToTree, this,
                                     std::placeholders::_1, std::placeholders::_2);
         tree.edgeAdded.connect(edgeAdded);
-        
+
         auto edgeRemoved = std::bind(&EnvireGraphVisualizer::edgeRemovedFromTree, this,
                                     std::placeholders::_1, std::placeholders::_2);
         tree.edgeRemoved.connect(edgeRemoved);
     }
 
-    rootId = rootNode;    
+    rootId = rootNode;
     addFrameName(QString::fromStdString(rootNode));
-    
+
     this->graph = graph;
     //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
     graph->getTree(rootNode, true, &tree);
-    
+
     initialized = true;
 }
 
@@ -105,7 +105,7 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
   }
   loadItems(target);
   addFrameName(QString::fromStdString(graph->getFrameId(target)));
-  
+
   LOG(INFO) << "Added edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
 }
 
@@ -114,9 +114,9 @@ void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, 
   const QString targetId = QString::fromStdString(graph->getFrameId(target));
   Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
   QMetaObject::invokeMethod(widget, "removeFrame", conType, Q_ARG(QString, targetId));
-  
+
   removeFrameName(QString::fromStdString(graph->getFrameId(target)));
-  
+
   LOG(INFO) << "Removed edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
 }
 
@@ -178,7 +178,7 @@ std::pair<QQuaternion, QVector3D> EnvireGraphVisualizer::convertTransform(const 
 void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 {
   const FrameId frame = graph->getFrameId(vertex);
-  
+
   graph->visitItems(frame, [this] (const ItemBase::Ptr item)
   {
     loadItem(item);
@@ -187,7 +187,7 @@ void EnvireGraphVisualizer::loadItems(const vertex_descriptor vertex)
 
 void EnvireGraphVisualizer::loadItem(const envire::core::ItemBase::Ptr item)
 {
-  LOG(INFO) << "Loading Visualizer for item: " << item->getIDString() << " of type " << demangledTypeName(*item);  
+  LOG(INFO) << "Loading Visualizer for item: " << item->getIDString() << " of type " << demangledTypeName(*item);
   if(itemVisuals.find(item->getID()) != itemVisuals.end())
   {
     LOG(ERROR) << "Ignoring item " << item->getIDString() << ". It already has a visual.";
@@ -240,7 +240,7 @@ void EnvireGraphVisualizer::redraw()
   TransformToUpdateMap updateMap(transformationsToUpdate);
   transformationsToUpdate.clear();
   transformationsToUpdateMutex.unlock();
-  
+
   for(const auto updatePair  : updateMap)
   {
       const FrameId& origin = updatePair.first.first;
@@ -252,7 +252,7 @@ void EnvireGraphVisualizer::redraw()
       std::tie(rot, trans) = convertTransform(tf);
       const QString qSrc = QString::fromStdString(origin);
       const QString qTarget = QString::fromStdString(target);
-      
+
       //needs to be invoked because we might have been called from the non-gui thread
       QMetaObject::invokeMethod(widget, "setTransformation", Qt::QueuedConnection,
                                 Q_ARG(QString, qSrc), Q_ARG(QString, qTarget),
@@ -268,37 +268,37 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
   const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
 
   TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
-  
+
   if(typeToUpdateMethod.count(qParameterType) > 1)
   {
-    LOG(WARNING) << "Multiple update methods registered for type " 
+    LOG(WARNING) << "Multiple update methods registered for type "
                   << parameterType << ". Using the most recently added one from: "
                   << it->libName.toStdString();
   }
-  
+
   if(it != typeToUpdateMethod.end())
   {
     const Vizkit3dPluginInformation::UpdateMethod& info = it.value();
-    
+
 
     VizPluginBase* vizPlugin = itemVisuals[item->getID()];
     //check if plugin already loaded, if not ty to
     if (!vizPlugin){
       QObject* plugin = nullptr;
-      
+
       QMetaObject::invokeMethod(widget, "loadPlugin", conType,
                                 Q_RETURN_ARG(QObject*, plugin),
                                 Q_ARG(QString, info.libName), Q_ARG(QString, ""));
       ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
       vizPlugin = dynamic_cast<VizPluginBase*>(plugin);
       ASSERT_NOT_NULL(vizPlugin);//everything loaded with vizkit should inherit from VizPluginBase
-      
+
       const QString qFrame = QString::fromStdString(item->getFrame());
-      
+
       //needs to be invoked because setting the data frame while rendering crashes vizkit3d
       QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
                               Q_ARG(QString, qFrame));
-      
+
       itemVisuals[item->getID()] = vizPlugin;
       LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
 
@@ -309,20 +309,20 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
     //NOTE cannot use non blocking calls because qt does not know how to handle the raw datatypes
     //std::cout << "try updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << std::endl;
     const void* raw = item->getRawData();
-    
+
     if (raw != nullptr){
       //std::cout << "updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
       it->method.invoke(vizPlugin, QGenericArgument(parameterType.c_str(), raw));
     }else{
       LOG(WARNING) << "updating item visual failed: NULL item: " << demangledTypeName(*item) << " " << parameterType.c_str() << " p:" << raw << std::endl;
     }
-    
-    
+
+
   }
   else
   {
     LOG(WARNING) << "No visualizer found for item type " << parameterType;
-  }  
+  }
 
 }
 
@@ -367,7 +367,7 @@ void EnvireGraphVisualizer::clearFrames()
 
 EnvireGraphVisualizer::~EnvireGraphVisualizer()
 {
-  //unsubscribe manually because we might destroy the graph before 
+  //unsubscribe manually because we might destroy the graph before
   //destroying base. In that case the automatic unsubscribe from base would crash.
   tree.unsubscribe();
   unsubscribe();

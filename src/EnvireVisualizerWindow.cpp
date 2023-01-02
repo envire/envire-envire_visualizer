@@ -28,7 +28,7 @@
 #include "ui_mainwindow.h"
 #include "EnvireGraphVisualizer.hpp"
 #include "TransformModel.hpp"
-#include "Helpers.hpp" 
+#include "Helpers.hpp"
 #include <vizkit3d_plugin_information/Vizkit3dPluginInformation.hpp>
 #include "DoubleSpinboxItemDelegate.hpp"
 #include "AddTransformDialog.hpp"
@@ -48,12 +48,12 @@
 #include "ItemManipulatorWidget.hpp"
 #include <vizkit3d/Vizkit3DWidget.hpp>
 
-using namespace envire::core;  
+using namespace envire::core;
 using vertex_descriptor = GraphTraits::vertex_descriptor;
 
 namespace envire { namespace viz
 {
-  
+
 EnvireVisualizerWindow::EnvireVisualizerWindow(): QMainWindow(), GraphEventDispatcher(),
 window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
 firstTimeDisplayingItems(true)
@@ -65,36 +65,36 @@ firstTimeDisplayingItems(true)
   tableViewItems = new QTableView(vizkit3dWidget);
   treeViewSelectedFrame = new QTreeView(vizkit3dWidget);
   listWidgetFrames = new QListWidget(vizkit3dWidget);
-  
+
   window->tabWidget->addTab(vizkit3dWidget, "3D View");
-  
-  view2D = new EnvireGraph2DStructurWidget(1000);
-  addItemDialog = new AddItemDialog(this); 
+
+  //view2D = new EnvireGraph2DStructurWidget(1000);
+  addItemDialog = new AddItemDialog(this);
   itemManipulator = new ItemManipulatorWidget(this);
-  
-  
+
+
   QDockWidget* itemDock = new QDockWidget("Items", vizkit3dWidget);
   itemDock->setWidget(tableViewItems);
-  
+
   QDockWidget* itemManipulatorDock = new QDockWidget("Item Manipulator", vizkit3dWidget);
   itemManipulatorDock->setWidget(itemManipulator);
-  
+
   QDockWidget* selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
   selectedFrameDock->setWidget(treeViewSelectedFrame);
-  
+
   QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
   framesDock->setWidget(listWidgetFrames);
-  
-  
-  
+
+
+
   vizkit3dWidget->addDockWidget(Qt::BottomDockWidgetArea, itemManipulatorDock);
   vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea, itemDock);
   vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea,  selectedFrameDock);
   vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea, framesDock);
 
-  
-  window->tabWidget->addTab(view2D, "2D View");
-  
+
+  //window->tabWidget->addTab(view2D, "2D View");
+
   treeViewSelectedFrame->setModel(&currentTransform);
   treeViewSelectedFrame->expandAll();
   DoubleSpinboxItemDelegate* del = new DoubleSpinboxItemDelegate(treeViewSelectedFrame);
@@ -104,18 +104,18 @@ firstTimeDisplayingItems(true)
   tableViewItems->setModel(&currentItems);//tableView will not take ownership
   tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
 
-  
+
   statusBar = new QStatusBar();
   setStatusBar(statusBar);
   statusBar->showMessage("test");
-  
+
   lastStatisticTime = std::chrono::system_clock::now();
-  
+
   connect(vizkit3dWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
   connect(vizkit3dWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
-          this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
+          this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));
   connect(vizkit3dWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
-          this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));          
+          this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));
   connect(window->actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window->actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
   connect(window->actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
@@ -127,9 +127,9 @@ firstTimeDisplayingItems(true)
           this, SLOT(transformChanged(const envire::core::Transform&)));
   connect(tableViewItems, SIGNAL(clicked(const QModelIndex&)), this,
           SLOT(itemClicked(const QModelIndex&)));
-  
+
   pluginInfos.reset(new vizkit3d::Vizkit3dPluginInformation(vizkit3dWidget));
-  
+
   //disable everything until a graph is loaded
   treeViewSelectedFrame->setEnabled(false);
   listWidgetFrames->setEnabled(false);
@@ -138,9 +138,9 @@ firstTimeDisplayingItems(true)
   window->actionRemove_Frame->setEnabled(false);
   window->actionSave_Graph->setEnabled(false);
   window->actionAdd_Item->setEnabled(false);
-  
+
 }
-  
+
 void EnvireVisualizerWindow::redraw()
 {
     std::lock_guard<std::mutex> lock(redrawMutex);
@@ -148,17 +148,17 @@ void EnvireVisualizerWindow::redraw()
     {
         visualzier->redraw();
     }
-    
+
     if(graph)
     {
         std::stringstream stream;
         GraphDrawing::write(*graph, stream);
-        
+
         const QString dotStr = QString::fromStdString(stream.str());
-        QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
-                            Q_ARG(QString, dotStr));  
+        //QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
+        //                    Q_ARG(QString, dotStr));
     }
-    
+
     QMetaObject::invokeMethod(this, "showStatistics", Qt::QueuedConnection);  //redraw might be called from any thread
 }
 
@@ -167,50 +167,50 @@ void EnvireVisualizerWindow::closeEvent(QCloseEvent *event)
     event->accept();
     emit widgetClosed();
 }
-  
+
 void EnvireVisualizerWindow::displayGraph(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
 {
   const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(this);
   QMetaObject::invokeMethod(this, "displayGraphInternal", conType,
                             Q_ARG(std::shared_ptr<envire::core::EnvireGraph>, graph),
-                            Q_ARG(QString, rootNode));  
+                            Q_ARG(QString, rootNode));
 }
-  
+
 void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::EnvireGraph> graph,
                               const QString& rootNode)
-{ 
+{
   if(this->graph)
   {
     this->graph->unsubscribe(this);
   }
   this->graph = graph;
   this->graph->subscribe(this);
-  
+
   //reset the widget because this might not be the first time the user loads a graph
   vizkit3dWidget->clear();
   vizkit3dWidget->setWorldName(rootNode);
   vizkit3dWidget->setEnabledManipulators(true);
-  
+
   visualzier.reset(new EnvireGraphVisualizer(graph, vizkit3dWidget,
                                              rootNode.toStdString(), pluginInfos));
   vizkit3dWidget->setRootFrame(rootNode);
-  
+
   connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this,
           SLOT(frameNameAdded(const QString&)));
   connect(visualzier.get(), SIGNAL(frameRemoved(const QString&)), this,
           SLOT(frameNameRemoved(const QString&)));
-    
+
   //get initially present frame names
   listWidgetFrames->clear();
   EnvireGraph::vertex_iterator it, end;
   std::tie(it, end) = graph->getVertices();
-  for(; it != end; it++) 
+  for(; it != end; it++)
   {
     const FrameId& id = graph->getFrameId(*it);
     listWidgetFrames->addItem(QString::fromStdString(id));
   }
-     
+
   treeViewSelectedFrame->setEnabled(false); //leave disabled because initially no frame is selected
   listWidgetFrames->setEnabled(true);
   vizkit3dWidget->setEnabled(true);
@@ -218,16 +218,16 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   window->actionRemove_Frame->setEnabled(false); //leave disabled because initially no frame is selected
   window->actionSave_Graph->setEnabled(true);
   window->actionAdd_Item->setEnabled(false); //leave disabled because initially no frame is selected
-  
+
   rootFrame = rootNode;
   selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
-  
+
   redraw();
 }
 
 void EnvireVisualizerWindow::displayGraph(const QString& filePath)
 {
-  try 
+  try
   {
     if(!QFile::exists(filePath))
     {
@@ -236,7 +236,7 @@ void EnvireVisualizerWindow::displayGraph(const QString& filePath)
     }
     std::shared_ptr<EnvireGraph> pGraph(new EnvireGraph());
     pGraph->loadFromFile(filePath.toStdString());
-    
+
     QStringList frames;
     EnvireGraph::vertex_iterator it, end;
     std::tie(it, end) = pGraph->getVertices();
@@ -283,11 +283,11 @@ void EnvireVisualizerWindow::removeFrame()
   if(!selectedFrame.isEmpty())
   {
     const FrameId frameId = selectedFrame.toStdString();
-    
+
     //has to be done before anything is removed, because some of the event handlers
     //depend on selectedFrame beeing valid
-    selectedFrame = ""; 
-    
+    selectedFrame = "";
+
     graph->disconnectFrame(frameId);
     graph->removeFrame(frameId);
     //this will trigger events, that will remove the frame from the list widget as well.
@@ -307,18 +307,18 @@ void EnvireVisualizerWindow::listWidgetItemChanged(QListWidgetItem * current, QL
 }
 
 void EnvireVisualizerWindow::selectFrame(const QString& name)
-{  
+{
   if(name != selectedFrame)
-  {     
+  {
     //select in list widget
     QList<QListWidgetItem*> items = listWidgetFrames->findItems(name, Qt::MatchExactly);
     assert(items.size() == 1);
     if(!items.first()->isSelected())
       items.first()->setSelected(true);
-    
+
     //display corresponding Transform
     const vertex_descriptor selectedVertex = graph->getVertex(name.toStdString());
-    
+
     if(visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end())
     {
       LOG(ERROR) << "vertex not in tree: " << name.toStdString();
@@ -328,17 +328,17 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
     if(parentVertex != graph->null_vertex())//happens when the root node is selected
       tf = graph->getTransform(parentVertex, selectedVertex);
     updateDisplayedTransform(parentVertex, selectedVertex, tf.transform);
-    
+
     //user should not be able to delete the root frame
     if(name == rootFrame)
       window->actionRemove_Frame->setEnabled(false);
     else
       window->actionRemove_Frame->setEnabled(true);
-    
+
     //are disabled if no frame was selected before
     window->actionAdd_Item->setEnabled(true);
     window->actionAdd_Frame->setEnabled(true);
-    
+
     vizkit3dWidget->selectFrame(name, true);
     selectedFrame = name;
     displayItems(selectedFrame);
@@ -385,12 +385,12 @@ void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
 void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& newValue)
 {
   const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
-  
+
   if(visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end())
   {
     LOG(ERROR) << "vertex not in tree: " << selectedFrame.toStdString();
   }
-  
+
   const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
   const FrameId source = graph->getFrameId(parentVertex);
   const FrameId target = selectedFrame.toStdString();
@@ -402,7 +402,7 @@ void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& new
 void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
 {
     ++numUpdates;
-    
+
     if(ignoreEdgeModifiedEvent)
         return;
     const QString origin = QString::fromStdString(e.origin);
@@ -411,7 +411,7 @@ void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
     //thread
     const Qt::ConnectionType conType = Qt::QueuedConnection;//Helpers::determineConnectionType(this);
     QMetaObject::invokeMethod(this, "edgeModifiedInternal", conType,
-                              Q_ARG(QString, origin), Q_ARG(QString, target));  
+                              Q_ARG(QString, origin), Q_ARG(QString, target));
 }
 
 void EnvireVisualizerWindow::edgeModifiedInternal(const QString& originFrame, const QString& targetFrame)
@@ -419,7 +419,7 @@ void EnvireVisualizerWindow::edgeModifiedInternal(const QString& originFrame, co
   vertex_descriptor originVertex = graph->getVertex(originFrame.toStdString());
   vertex_descriptor targetVertex = graph->getVertex(targetFrame.toStdString());
   const TreeView& tree = visualzier->getTree();
-  
+
   if(tree.vertexExists(originVertex) && tree.vertexExists(targetVertex))
   {
     if(selectedFrame == originFrame)
@@ -438,7 +438,7 @@ void EnvireVisualizerWindow::edgeModifiedInternal(const QString& originFrame, co
         updateDisplayedTransform(originVertex, targetVertex, tf.transform);
       }
     }
-  }  
+  }
 }
 
 void EnvireVisualizerWindow::loadGraph()
@@ -482,7 +482,7 @@ void EnvireVisualizerWindow::displayItems(const QString& frame)
     this->currentItems.addItem(item);
     visited = true;
   });
-  
+
   //resize the table on the first time it has some content.
   //afterwards the user may change it and we not want to override the users
   //size choice
@@ -491,7 +491,7 @@ void EnvireVisualizerWindow::displayItems(const QString& frame)
     firstTimeDisplayingItems = false;
     tableViewItems->horizontalHeader()->resizeSections(QHeaderView::ResizeToContents);
   }
-  
+
 }
 
 void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
@@ -509,13 +509,13 @@ void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVe
       const base::Quaterniond delta = (tf.transform.orientation * rotation) * tf.transform.orientation.inverse();
       tf.transform.orientation = delta * tf.transform.orientation;
       tf.transform.translation = tf.transform.orientation * translation + tf.transform.translation;
-      
+
       if(finished)
       {
         graph->updateTransform(parentVertex, movedVertex, tf);
         redraw();
       }
-      
+
       updateDisplayedTransform(parentVertex, movedVertex, tf.transform);
     }
     else
@@ -526,7 +526,7 @@ void EnvireVisualizerWindow::internalFrameMoving(const QString& frame, const QVe
   else
   {
     LOG(ERROR) << "Moved a frame that is not part of the graph: " << frame.toStdString();
-  }  
+  }
 }
 
 void EnvireVisualizerWindow::frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot)
@@ -553,7 +553,7 @@ void EnvireVisualizerWindow::addItem()
 void EnvireVisualizerWindow::itemClicked(const QModelIndex & index)
 {
   ItemBase::Ptr item = currentItems.getItem(index);
- 
+
   itemManipulator->itemSelected(item, graph, visualzier->getTree());
 }
 
@@ -563,7 +563,7 @@ void EnvireVisualizerWindow::showStatistics()
     if(graph)
     {
         const double t = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastStatisticTime).count();
-        
+
         if(t >= 1000)
         {
             const double updatesSec = double(numUpdates) / t * 1000.0;

@@ -27,7 +27,7 @@
 #pragma once
 #include "TransformModel.hpp"
 #include "ItemTableModel.hpp"
-#include <QMainWindow> 
+#include <QMainWindow>
 #include <QListWidgetItem>
 #include <memory>
 #if QT_VERSION >= 0x050000 || !defined(Q_MOC_RUN)
@@ -42,7 +42,7 @@ class QTableView;
 class QTreeView;
 class QListWidget;
 
-namespace Ui 
+namespace Ui
 {
   class MainWindow;
 }
@@ -54,15 +54,15 @@ namespace vizkit3d
 }
 
 
-namespace envire { namespace core 
+namespace envire { namespace core
 {
   class EnvireGraph;
   class EdgeModifiedEvent;
 }}
 
-namespace envire { namespace viz 
+namespace envire { namespace viz
 {
-  
+
 class EnvireGraphVisualizer;
 class EnvireGraph2DStructurWidget;
 class AddItemDialog;
@@ -72,7 +72,7 @@ class EnvireVisualizerWindow : public QMainWindow, public envire::core::GraphEve
 {
     Q_OBJECT
 public:
-      
+
     /**Create an unitialized envire visualizer that displays nothing.*/
     EnvireVisualizerWindow();
 
@@ -92,8 +92,8 @@ public:
     std::shared_ptr<EnvireGraphVisualizer> getVisualizer(){
         return visualzier;
     }
-  
-  
+
+
 public slots:
     void addFrame();
     /**Remove the currently selected frame (if any) */
@@ -116,7 +116,7 @@ public slots:
     * @note Only call if you know that the graph is not modifed at the same time.
     * @note Is thread safe in a sense that no two threads can call redraw at the same time*/
     void redraw();
-    
+
 private slots:
     void framePicked(const QString&);
     /**shows the add item dialog for the selected frame */
@@ -140,24 +140,24 @@ private slots:
 
     /**Invoked whenever the user clicks on an item */
     void itemClicked(const QModelIndex & index);
-  
+
     void showStatistics();
-    
+
 signals:
     /**emitted when the widget is closed */
     void widgetClosed();
-  
+
 protected:
     void closeEvent(QCloseEvent *event);
 private:
-  
+
     /** @param finished if false, the movement is still ongoing, if true the movement is done */
     void internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
                            bool finished);
-  
+
     /**selects the frame named @p name in the 2d listview and 3d window */
     void selectFrame(const QString& name);
-    
+
 
     std::shared_ptr<Ui::MainWindow> window;
     std::shared_ptr<envire::core::EnvireGraph> graph;
@@ -180,12 +180,12 @@ private:
     QStatusBar* statusBar;
 
     std::mutex redrawMutex;
-  
+
     std::chrono::system_clock::time_point lastStatisticTime;
     size_t numUpdates;
     size_t totalNumUpdates;
-    
+
 };
-  
-  
+
+
 }}
