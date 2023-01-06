@@ -68,32 +68,29 @@ firstTimeDisplayingItems(true)
 
   window->tabWidget->addTab(vizkit3dWidget, "3D View");
 
-  //view2D = new EnvireGraph2DStructurWidget(1000);
+  view2D = new EnvireGraph2DStructurWidget(1000);
   addItemDialog = new AddItemDialog(this);
   itemManipulator = new ItemManipulatorWidget(this);
 
 
-  QDockWidget* itemDock = new QDockWidget("Items", vizkit3dWidget);
+  itemDock = new QDockWidget("Items", vizkit3dWidget);
   itemDock->setWidget(tableViewItems);
 
-  QDockWidget* itemManipulatorDock = new QDockWidget("Item Manipulator", vizkit3dWidget);
+  itemManipulatorDock = new QDockWidget("Item Manipulator", vizkit3dWidget);
   itemManipulatorDock->setWidget(itemManipulator);
 
-  QDockWidget* selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
+  selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
   selectedFrameDock->setWidget(treeViewSelectedFrame);
 
-  QDockWidget* framesDock = new QDockWidget("Frames", vizkit3dWidget);
+  framesDock = new QDockWidget("Frames", vizkit3dWidget);
   framesDock->setWidget(listWidgetFrames);
-
-
 
   vizkit3dWidget->addDockWidget(Qt::BottomDockWidgetArea, itemManipulatorDock);
   vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea, itemDock);
   vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea,  selectedFrameDock);
   vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea, framesDock);
 
-
-  //window->tabWidget->addTab(view2D, "2D View");
+  window->tabWidget->addTab(view2D, "2D View");
 
   treeViewSelectedFrame->setModel(&currentTransform);
   treeViewSelectedFrame->expandAll();
@@ -155,8 +152,8 @@ void EnvireVisualizerWindow::redraw()
         GraphDrawing::write(*graph, stream);
 
         const QString dotStr = QString::fromStdString(stream.str());
-        //QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
-        //                    Q_ARG(QString, dotStr));
+        QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
+                            Q_ARG(QString, dotStr));
     }
 
     QMetaObject::invokeMethod(this, "showStatistics", Qt::QueuedConnection);  //redraw might be called from any thread
@@ -579,6 +576,22 @@ void EnvireVisualizerWindow::showStatistics()
     {
         statusBar->showMessage("No Graph");
     }
+}
+
+void EnvireVisualizerWindow::removeItemManipulatorDock() {
+    vizkit3dWidget->removeDockWidget(itemManipulatorDock);
+}
+
+void EnvireVisualizerWindow::removeItemDock() {
+    vizkit3dWidget->removeDockWidget(itemDock);
+}
+
+void EnvireVisualizerWindow::removeSelectedFrameDock() {
+    vizkit3dWidget->removeDockWidget(selectedFrameDock);
+}
+
+void EnvireVisualizerWindow::removeFramesDock() {
+    vizkit3dWidget->removeDockWidget(framesDock);
 }
 
 
