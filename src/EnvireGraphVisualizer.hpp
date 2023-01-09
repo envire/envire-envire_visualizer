@@ -45,115 +45,119 @@
 #include <vizkit3d_plugin_information/Vizkit3dPluginInformation.hpp>
 #endif
 
-namespace envire { namespace core
+namespace envire
 {
-  class EnvireGraph;
-}}
+    namespace core
+    {
+        class EnvireGraph;
+    }
+}
 
-namespace envire { namespace viz
+namespace envire
 {
+    namespace viz
+    {
 
-/**Draws an envire graph into a Vizkit3DWidget */
-class EnvireGraphVisualizer : public vizkit3d::Vizkit3DWidget, public  envire::core::GraphEventDispatcher
-{
-  Q_OBJECT
-  using vertex_descriptor = envire::core::GraphTraits::vertex_descriptor;
-  using edge_descriptor = envire::core::GraphTraits::edge_descriptor;
-  using FrameId = envire::core::FrameId;
-public:
+        /**Draws an envire graph into a Vizkit3DWidget */
+        class EnvireGraphVisualizer : public vizkit3d::Vizkit3DWidget, public envire::core::GraphEventDispatcher
+        {
+            Q_OBJECT
+            using vertex_descriptor = envire::core::GraphTraits::vertex_descriptor;
+            using edge_descriptor = envire::core::GraphTraits::edge_descriptor;
+            using FrameId = envire::core::FrameId;
 
-  /**
-   * @param rootNode the name of the frame that should be placed in the world origin*/
-    /**Allows for lazy initialization */
-    EnvireGraphVisualizer();
+        public:
+            /**
+             * @param rootNode the name of the frame that should be placed in the world origin*/
+            /**Allows for lazy initialization */
+            EnvireGraphVisualizer();
 
-    /** (re)-initializes the visualizer. Use this method to change the displayed
-     *  graph*/
-    void init(std::shared_ptr<envire::core::EnvireGraph> graph,
-              const envire::core::FrameId& rootNode);
+            /** (re)-initializes the visualizer. Use this method to change the displayed
+             *  graph*/
+            void init(std::shared_ptr<envire::core::EnvireGraph> graph,
+                      const envire::core::FrameId &rootNode);
 
-  ~EnvireGraphVisualizer();
+            ~EnvireGraphVisualizer();
 
-  const QSet<QString>& getFrameNames() const;
+            const QSet<QString> &getFrameNames() const;
 
-  /**Returns a reference to the TreeView that is currently visualized. */
-  const envire::core::TreeView& getTree() const;
+            /**Returns a reference to the TreeView that is currently visualized. */
+            const envire::core::TreeView &getTree() const;
 
-public slots:
-    /**Get all transformation changes from the graph and redraw the graph.
-     * @note expensive, don't call too often.
-     * @note This method is not thread safe. Do **not** modify the graph while
-     *       redrawing.
-     */
-    void redraw();
+        public slots:
+            /**Get all transformation changes from the graph and redraw the graph.
+             * @note expensive, don't call too often.
+             * @note This method is not thread safe. Do **not** modify the graph while
+             *       redrawing.
+             */
+            void redraw();
 
-    void updateVisual(envire::core::ItemBase::Ptr item);
+            void updateVisual(envire::core::ItemBase::Ptr item);
 
-protected:
-  /**Is invoked whenever a transform changes in the graph */
-  virtual void edgeModified(const envire::core::EdgeModifiedEvent& e);
+        protected:
+            /**Is invoked whenever a transform changes in the graph */
+            virtual void edgeModified(const envire::core::EdgeModifiedEvent &e);
 
-signals:
-  void frameAdded(const QString& frame);
-  void frameRemoved(const QString& frame);
+        signals:
+            void frameAdded(const QString &frame);
+            void frameRemoved(const QString &frame);
 
-private:
-  void loadPlugins();
+        private:
+            void loadPlugins();
 
-  /**Is invoked whenever a new edge is added to the current tree*/
-  void edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target);
-  /**Is invoked whenever an edge is removed from the current tree */
-  void edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target);
-  /**Is invoked whenever a new item is added to the graph*/
-  virtual void itemAdded(const envire::core::ItemAddedEvent& e);
-  /**Is invoked whenever an item is deleted from the graph */
-  virtual void itemRemoved(const envire::core::ItemRemovedEvent& e);
+            /**Is invoked whenever a new edge is added to the current tree*/
+            void edgeAddedToTree(vertex_descriptor origin, vertex_descriptor target);
+            /**Is invoked whenever an edge is removed from the current tree */
+            void edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target);
+            /**Is invoked whenever a new item is added to the graph*/
+            virtual void itemAdded(const envire::core::ItemAddedEvent &e);
+            /**Is invoked whenever an item is deleted from the graph */
+            virtual void itemRemoved(const envire::core::ItemRemovedEvent &e);
 
-  /**Display all items that are in @p vertex */
-  void loadItems(const vertex_descriptor vertex);
-  /**Display @p item */
-  void loadItem(const envire::core::ItemBase::Ptr item);
+            /**Display all items that are in @p vertex */
+            void loadItems(const vertex_descriptor vertex);
+            /**Display @p item */
+            void loadItem(const envire::core::ItemBase::Ptr item);
 
-  /**Adds @p name to frameNames and emits frameAdded*/
-  void addFrameName(const QString& name);
-  /**Removes @p name from frameNames and emits frameRemoved */
-  void removeFrameName(const QString& name);
+            /**Adds @p name to frameNames and emits frameAdded*/
+            void addFrameName(const QString &name);
+            /**Removes @p name from frameNames and emits frameRemoved */
+            void removeFrameName(const QString &name);
 
-  /**removes all frame names from frameNames.
-   * Removes the frames from the widget aswell.
-   * Emits frameRemoved for each name */
-  void clearFrames();
+            /**removes all frame names from frameNames.
+             * Removes the frames from the widget aswell.
+             * Emits frameRemoved for each name */
+            void clearFrames();
 
-  /**Remove @p item from the Vizkit3dWidget */
-  void removeItemPlugin(vizkit3d::VizPluginBase* item);
-  /**Removes all item visuals from itemVisuals and from the widget */
-  void clearItemVisuals();
+            /**Remove @p item from the Vizkit3dWidget */
+            void removeItemPlugin(vizkit3d::VizPluginBase *item);
+            /**Removes all item visuals from itemVisuals and from the widget */
+            void clearItemVisuals();
 
+            /**Gets the current transformation between @p origin and @p target from the
+             * graph and sets it in the widget*/
+            void setTransformation(const FrameId &origin, const FrameId &target);
+            void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
 
-  /**Gets the current transformation between @p origin and @p target from the
-   * graph and sets it in the widget*/
-  void setTransformation(const FrameId& origin, const FrameId& target);
-  void setTransformation(const vertex_descriptor origin, const vertex_descriptor target);
+            /**Converts a transformation from envire format to vizkit3d format */
+            std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform &tf) const;
 
-  /**Converts a transformation from envire format to vizkit3d format */
-  std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;
+            using ItemVisualMap = std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase *, boost::hash<boost::uuids::uuid>>;
 
-  using ItemVisualMap = std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase*, boost::hash<boost::uuids::uuid>>;
+            std::shared_ptr<envire::core::EnvireGraph> graph; /**< the graph that is visualized*/
+            envire::core::TreeView tree;
+            vizkit3d::Vizkit3DWidget *widget;                                 /**< Is used to display the graph */
+            std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
+            ItemVisualMap itemVisuals;                                        /**<Map of all items that are currently visualized and the plugin visualizing them*/
+            QSet<QString> frameNames;                                         // contains the names of all frames in the current tree
+            bool initialized;
+            envire::core::FrameId rootId;
 
-  std::shared_ptr<envire::core::EnvireGraph> graph; /**< the graph that is visualized*/
-  envire::core::TreeView tree;
-  vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
-  std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
-  ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
-  QSet<QString> frameNames; //contains the names of all frames in the current tree
-  bool initialized;
-  envire::core::FrameId rootId;
+            std::mutex transformationsToUpdateMutex;
+            /**Buffer that stores all transformations that need to be updated since the last redraw */
+            using TransformToUpdateMap = std::unordered_map<std::pair<std::string, std::string>, envire::core::Transform, boost::hash<std::pair<std::string, std::string>>>;
+            TransformToUpdateMap transformationsToUpdate;
+        };
 
-  std::mutex transformationsToUpdateMutex;
-  /**Buffer that stores all transformations that need to be updated since the last redraw */
-  using TransformToUpdateMap = std::unordered_map<std::pair<std::string, std::string>, envire::core::Transform,  boost::hash <std::pair <std::string, std::string>>>;
-  TransformToUpdateMap transformationsToUpdate;
-
-};
-
-}}
+    }
+}
