@@ -42,24 +42,18 @@ namespace envire { namespace viz
 {
 using TypeToUpdateMapping = vizkit3d::Vizkit3dPluginInformation::TypeToUpdateMapping;
 
-
-EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::EnvireGraph> graph,
-                                             Vizkit3DWidget* widget,
-                                             const FrameId& rootNode,
-                                             std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos) :
-    GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos),
-    initialized(false)
+EnvireGraphVisualizer::EnvireGraphVisualizer() :
+  initialized(false)
 {
-    init(graph, rootNode);
+    pluginInfos.reset(new vizkit3d::Vizkit3dPluginInformation(this));
 }
-
-EnvireGraphVisualizer::EnvireGraphVisualizer(vizkit3d::Vizkit3DWidget* widget,
-                                             std::shared_ptr<Vizkit3dPluginInformation> pluginInfos) :
-    widget(widget), pluginInfos(pluginInfos), initialized(false)
-{}
 
 void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const FrameId& rootNode)
 {
+    this->clear();
+    this->setWorldName(QString(rootNode.c_str()));
+    this->setRootFrame(QString(rootNode.c_str()));
+
     if(initialized)
     {
         //clear old stuff before re-initializing
@@ -84,6 +78,7 @@ void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const Fra
     addFrameName(QString::fromStdString(rootNode));
 
     this->graph = graph;
+    this->graph->subscribe(this);
     //will cause edgeAdded events which will be handled by EnvireGraphVisualizer::edgeAddedToTree
     graph->getTree(rootNode, true, &tree);
 
@@ -107,13 +102,14 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
   addFrameName(QString::fromStdString(graph->getFrameId(target)));
 
   LOG(INFO) << "Added edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
+  redraw();
 }
 
 void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)
 {
   const QString targetId = QString::fromStdString(graph->getFrameId(target));
-  Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
-  QMetaObject::invokeMethod(widget, "removeFrame", conType, Q_ARG(QString, targetId));
+  Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(this);
+  QMetaObject::invokeMethod(this, "removeFrame", conType, Q_ARG(QString, targetId));
 
   removeFrameName(QString::fromStdString(graph->getFrameId(target)));
 
@@ -122,6 +118,7 @@ void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, 
 
 void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)
 {
+  std::cout << "[EnvireGraphVisualizer::itemAdded] " << e.frame << std::endl;
   const GraphTraits::vertex_descriptor vd = graph->getVertex(e.frame);
   //if the vertex that the item was added to is part of the current tree
   if(tree.vertexExists(vd))
@@ -160,8 +157,8 @@ void EnvireGraphVisualizer::clearItemVisuals()
 void EnvireGraphVisualizer::removeItemPlugin(VizPluginBase* itemViz)
 {
     ASSERT_NOT_NULL(itemViz);
-    Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
-    QMetaObject::invokeMethod(widget, "removePlugin", conType, Q_ARG(QObject*, itemViz));
+    Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(this);
+    QMetaObject::invokeMethod(this, "removePlugin", conType, Q_ARG(QObject*, itemViz));
 }
 
 
@@ -254,7 +251,7 @@ void EnvireGraphVisualizer::redraw()
       const QString qTarget = QString::fromStdString(target);
 
       //needs to be invoked because we might have been called from the non-gui thread
-      QMetaObject::invokeMethod(widget, "setTransformation", Qt::QueuedConnection,
+      QMetaObject::invokeMethod(this, "setTransformation", Qt::QueuedConnection,
                                 Q_ARG(QString, qSrc), Q_ARG(QString, qTarget),
                                 Q_ARG(QVector3D, trans), Q_ARG(QQuaternion, rot));
   }
@@ -265,7 +262,7 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
   const std::string parameterType = ItemMetadataMapping::getMetadata(*item->getTypeInfo()).embeddedTypename;
   const QString qParameterType = QString::fromStdString(parameterType);
   const TypeToUpdateMapping& typeToUpdateMethod = pluginInfos->getTypeToUpdateMethodMapping();
-  const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(widget);
+  const Qt::ConnectionType conType = Helpers::determineBlockingConnectionType(this);
 
   TypeToUpdateMapping::ConstIterator it = typeToUpdateMethod.find(qParameterType);
 
@@ -286,7 +283,7 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
     if (!vizPlugin){
       QObject* plugin = nullptr;
 
-      QMetaObject::invokeMethod(widget, "loadPlugin", conType,
+      QMetaObject::invokeMethod(this, "loadPlugin", conType,
                                 Q_RETURN_ARG(QObject*, plugin),
                                 Q_ARG(QString, info.libName), Q_ARG(QString, ""));
       ASSERT_NOT_NULL(plugin);//loading should never fail (has been loaded successfully before)
@@ -298,6 +295,9 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
       //needs to be invoked because setting the data frame while rendering crashes vizkit3d
       QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
                               Q_ARG(QString, qFrame));
+
+      if (qParameterType.toStdString() == "smurf::Collidable")
+        vizPlugin->setPluginEnabled(false);
 
       itemVisuals[item->getID()] = vizPlugin;
       LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
@@ -358,7 +358,7 @@ void EnvireGraphVisualizer::clearFrames()
 {
     while(frameNames.size() > 0)
     {
-    QMetaObject::invokeMethod(widget, "removeFrame", Qt::QueuedConnection,
+    QMetaObject::invokeMethod(this, "removeFrame", Qt::QueuedConnection,
                               Q_ARG(QString, *frameNames.begin()));
         removeFrameName(*frameNames.begin());
     }

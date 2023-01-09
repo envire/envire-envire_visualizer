@@ -87,7 +87,10 @@ public:
     /**Returns a shared_ptr to the currently displayed graph */
     std::shared_ptr<envire::core::EnvireGraph> getGraph() const;
 
-    vizkit3d::Vizkit3DWidget* getWidget() { return vizkit3dWidget; }
+    vizkit3d::Vizkit3DWidget* getWidget() {
+        //TODO: return vizkit3dWidget;
+        return (vizkit3d::Vizkit3DWidget*)visualzier.get();
+    }
 
     std::shared_ptr<EnvireGraphVisualizer> getVisualizer(){
         return visualzier;
@@ -170,7 +173,6 @@ private:
     std::shared_ptr<Ui::MainWindow> window;
     std::shared_ptr<envire::core::EnvireGraph> graph;
     std::shared_ptr<EnvireGraphVisualizer> visualzier;//is ptr for lazy instanziation
-    std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos;//is ptr for lazy instanziation
     QString selectedFrame;//currently selected frame, empty if none
     QString rootFrame;//the root frame of the displayed tree
     TransformModel currentTransform;//model of the currently selected transform
@@ -181,7 +183,6 @@ private:
     AddItemDialog* addItemDialog;
     envire::core::ItemBase::Ptr selectedItem;
     ItemManipulatorWidget* itemManipulator;
-    vizkit3d::Vizkit3DWidget* vizkit3dWidget;
     QTableView* tableViewItems;
     QTreeView* treeViewSelectedFrame;
     QListWidget* listWidgetFrames;

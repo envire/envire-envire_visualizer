@@ -61,34 +61,35 @@ firstTimeDisplayingItems(true)
   numUpdates = 0;
   totalNumUpdates = 0;
   window->setupUi(this);
-  vizkit3dWidget = new vizkit3d::Vizkit3DWidget;
-  tableViewItems = new QTableView(vizkit3dWidget);
-  treeViewSelectedFrame = new QTreeView(vizkit3dWidget);
-  listWidgetFrames = new QListWidget(vizkit3dWidget);
 
-  window->tabWidget->addTab(vizkit3dWidget, "3D View");
+  // add graph 3d visualization
+  visualzier = std::make_shared<EnvireGraphVisualizer>();
+  window->tabWidget->addTab(visualzier.get(), "3D View");
+
+  tableViewItems = new QTableView(visualzier.get());
+  treeViewSelectedFrame = new QTreeView(visualzier.get());
+  listWidgetFrames = new QListWidget(visualzier.get());
 
   view2D = new EnvireGraph2DStructurWidget(1000);
   addItemDialog = new AddItemDialog(this);
   itemManipulator = new ItemManipulatorWidget(this);
 
-
-  itemDock = new QDockWidget("Items", vizkit3dWidget);
+  itemDock = new QDockWidget("Items", visualzier.get());
   itemDock->setWidget(tableViewItems);
 
-  itemManipulatorDock = new QDockWidget("Item Manipulator", vizkit3dWidget);
+  itemManipulatorDock = new QDockWidget("Item Manipulator", visualzier.get());
   itemManipulatorDock->setWidget(itemManipulator);
 
-  selectedFrameDock = new QDockWidget("Selected Frame", vizkit3dWidget);
+  selectedFrameDock = new QDockWidget("Selected Frame", visualzier.get());
   selectedFrameDock->setWidget(treeViewSelectedFrame);
 
-  framesDock = new QDockWidget("Frames", vizkit3dWidget);
+  framesDock = new QDockWidget("Frames", visualzier.get());
   framesDock->setWidget(listWidgetFrames);
 
-  vizkit3dWidget->addDockWidget(Qt::BottomDockWidgetArea, itemManipulatorDock);
-  vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea, itemDock);
-  vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea,  selectedFrameDock);
-  vizkit3dWidget->addDockWidget(Qt::LeftDockWidgetArea, framesDock);
+  visualzier.get()->addDockWidget(Qt::BottomDockWidgetArea, itemManipulatorDock);
+  visualzier.get()->addDockWidget(Qt::LeftDockWidgetArea, itemDock);
+  visualzier.get()->addDockWidget(Qt::LeftDockWidgetArea,  selectedFrameDock);
+  visualzier.get()->addDockWidget(Qt::LeftDockWidgetArea, framesDock);
 
   window->tabWidget->addTab(view2D, "2D View");
 
@@ -101,17 +102,16 @@ firstTimeDisplayingItems(true)
   tableViewItems->setModel(&currentItems);//tableView will not take ownership
   tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
 
-
   statusBar = new QStatusBar();
   setStatusBar(statusBar);
   statusBar->showMessage("test");
 
   lastStatisticTime = std::chrono::system_clock::now();
 
-  connect(vizkit3dWidget, SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
-  connect(vizkit3dWidget, SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
+  connect(visualzier.get(), SIGNAL(frameSelected(const QString&)), this, SLOT(framePicked(const QString&)));
+  connect(visualzier.get(), SIGNAL(frameMoved(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));
-  connect(vizkit3dWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
+  connect(visualzier.get(), SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));
   connect(window->actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
   connect(window->actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
@@ -125,12 +125,11 @@ firstTimeDisplayingItems(true)
   connect(tableViewItems, SIGNAL(clicked(const QModelIndex&)), this,
           SLOT(itemClicked(const QModelIndex&)));
 
-  pluginInfos.reset(new vizkit3d::Vizkit3dPluginInformation(vizkit3dWidget));
-
   //disable everything until a graph is loaded
   treeViewSelectedFrame->setEnabled(false);
   listWidgetFrames->setEnabled(false);
-  vizkit3dWidget->setEnabled(true);
+
+  visualzier->setEnabled(true);
   window->actionAdd_Frame->setEnabled(false);
   window->actionRemove_Frame->setEnabled(false);
   window->actionSave_Graph->setEnabled(false);
@@ -185,13 +184,9 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
   this->graph->subscribe(this);
 
   //reset the widget because this might not be the first time the user loads a graph
-  vizkit3dWidget->clear();
-  vizkit3dWidget->setWorldName(rootNode);
-  vizkit3dWidget->setEnabledManipulators(true);
+  visualzier->init(graph, rootNode.toStdString());
+  visualzier->setEnabledManipulators(true);
 
-  visualzier.reset(new EnvireGraphVisualizer(graph, vizkit3dWidget,
-                                             rootNode.toStdString(), pluginInfos));
-  vizkit3dWidget->setRootFrame(rootNode);
 
   connect(visualzier.get(), SIGNAL(frameAdded(const QString&)), this,
           SLOT(frameNameAdded(const QString&)));
@@ -210,7 +205,7 @@ void EnvireVisualizerWindow::displayGraphInternal(std::shared_ptr<envire::core::
 
   treeViewSelectedFrame->setEnabled(false); //leave disabled because initially no frame is selected
   listWidgetFrames->setEnabled(true);
-  vizkit3dWidget->setEnabled(true);
+  visualzier->setEnabled(true);
   window->actionAdd_Frame->setEnabled(false);
   window->actionRemove_Frame->setEnabled(false); //leave disabled because initially no frame is selected
   window->actionSave_Graph->setEnabled(true);
@@ -336,7 +331,7 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
     window->actionAdd_Item->setEnabled(true);
     window->actionAdd_Frame->setEnabled(true);
 
-    vizkit3dWidget->selectFrame(name, true);
+    visualzier->selectFrame(name, true);
     selectedFrame = name;
     displayItems(selectedFrame);
   }
@@ -369,7 +364,7 @@ void EnvireVisualizerWindow::updateDisplayedTransform(const vertex_descriptor pa
 void EnvireVisualizerWindow::frameNameAdded(const QString& name)
 {
     std::cout << "ADDED: " << name.toStdString() << std::endl;
-  listWidgetFrames->addItem(name);
+    listWidgetFrames->addItem(name);
 }
 
 void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
@@ -579,19 +574,19 @@ void EnvireVisualizerWindow::showStatistics()
 }
 
 void EnvireVisualizerWindow::removeItemManipulatorDock() {
-    vizkit3dWidget->removeDockWidget(itemManipulatorDock);
+    visualzier->removeDockWidget(itemManipulatorDock);
 }
 
 void EnvireVisualizerWindow::removeItemDock() {
-    vizkit3dWidget->removeDockWidget(itemDock);
+    visualzier->removeDockWidget(itemDock);
 }
 
 void EnvireVisualizerWindow::removeSelectedFrameDock() {
-    vizkit3dWidget->removeDockWidget(selectedFrameDock);
+    visualzier->removeDockWidget(selectedFrameDock);
 }
 
 void EnvireVisualizerWindow::removeFramesDock() {
-    vizkit3dWidget->removeDockWidget(framesDock);
+    visualzier->removeDockWidget(framesDock);
 }
 
 

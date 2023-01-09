@@ -39,7 +39,7 @@ struct EnvireVisualizerWidget::Data {
     shared_ptr<EnvireGraphVisualizer> visualizer;
     shared_ptr<Vizkit3dPluginInformation> pluginInfos;
     bool initialized = false;
-    
+
 };
 
 
@@ -62,7 +62,7 @@ void EnvireVisualizerWidget::updateMainNode ( osg::Node* node )
 {
     osg::Geode* geode = static_cast<osg::Geode*>(node);
     // Update the main node using the data in p->data
-    
+
 }
 
 void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& value)
@@ -70,15 +70,15 @@ void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& v
     if(!p->initialized)
     {
         //wait for the widget to become fully initialized. depending on who created it this might never happen
-        if(getWidget() != nullptr) 
+        if(getWidget() != nullptr)
         {
             p->graph.reset(new EnvireGraph);
             p->pluginInfos.reset(new Vizkit3dPluginInformation(getWidget()));
-            p->visualizer.reset(new EnvireGraphVisualizer(getWidget(), p->pluginInfos));
+            p->visualizer.reset(new EnvireGraphVisualizer());
             p->initialized = true;
         }
     }
-    
+
     if(p->initialized)
     {
         *(p->graph.get()) = value;

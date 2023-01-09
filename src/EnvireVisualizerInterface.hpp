@@ -3,8 +3,8 @@
 #include <envire_core/graph/EnvireGraph.hpp>
 
 class EnvireVisualizerImpl;
-namespace envire{ 
-    namespace viz{ 
+namespace envire{
+    namespace viz{
         class EnvireVisualizerWindow;
     }
 }
