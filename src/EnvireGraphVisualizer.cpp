@@ -199,9 +199,15 @@ namespace envire
             // only update if this is an edge of the current tree and not a cross-edge
             const vertex_descriptor origin = graph->getVertex(e.origin);
             const vertex_descriptor target = graph->getVertex(e.target);
+
             if (tree.edgeExists(origin, target))
             {
+                // transformation changes are buffered
+                // so the transformation changes will be not applied to visualization
+                // you are required to call redraw to see the changes
                 setTransformation(origin, target);
+                // TOFO: temporarly call redraw to work with mars2
+                redraw();
             }
         }
 
