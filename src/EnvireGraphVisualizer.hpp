@@ -84,6 +84,8 @@ namespace envire
             /**Returns a reference to the TreeView that is currently visualized. */
             const envire::core::TreeView &getTree() const;
 
+            void enablePlugin(std::string pluginTypename, bool enable = true);
+
         public slots:
             /**Get all transformation changes from the graph and redraw the graph.
              * @note expensive, don't call too often.
@@ -152,6 +154,11 @@ namespace envire
             QSet<QString> frameNames;                                         // contains the names of all frames in the current tree
             bool initialized;
             envire::core::FrameId rootId;
+
+            // TODO: delete plugins from map if the items were removed
+            // this is done for itemVisuals map
+            std::map<std::string, std::vector<vizkit3d::VizPluginBase *>> mapPluginType;
+            std::map<std::string, bool> pluginEnableState;
 
             std::mutex transformationsToUpdateMutex;
             /**Buffer that stores all transformations that need to be updated since the last redraw */

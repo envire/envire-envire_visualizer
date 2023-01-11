@@ -253,9 +253,20 @@ namespace envire
             }
         }
 
+        void EnvireGraphVisualizer::enablePlugin(std::string pluginTypename, bool enable) {
+            pluginEnableState[pluginTypename] = enable;
+
+            // set enable state to all loaded plugins
+            auto it = mapPluginType.find(pluginTypename);
+            if (it != mapPluginType.end()) {
+                for (auto plugin : it->second) {
+                    plugin->setPluginEnabled(enable);
+                }
+            }
+        }
+
         void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item)
         {
-
             const std::string parameterType = ItemMetadataMapping::getMetadata(*item->getTypeInfo()).embeddedTypename;
             const QString qParameterType = QString::fromStdString(parameterType);
             const TypeToUpdateMapping &typeToUpdateMethod = pluginInfos->getTypeToUpdateMethodMapping();
@@ -293,8 +304,13 @@ namespace envire
                     QMetaObject::invokeMethod(vizPlugin, "setVisualizationFrame", conType,
                                               Q_ARG(QString, qFrame));
 
-                    if (qParameterType.toStdString() == "smurf::Collidable")
-                        vizPlugin->setPluginEnabled(false);
+                    // check if plugin is wanted to be set as enabled/disabled
+                    // if the pluginEnableState has no entry for required plugin type
+                    // plugin of that type will be enabled
+                    auto it = pluginEnableState.find(parameterType);
+                    if (it != pluginEnableState.end()) {
+                        vizPlugin->setPluginEnabled(it->second);
+                    }
 
                     itemVisuals[item->getID()] = vizPlugin;
                     LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
@@ -302,6 +318,9 @@ namespace envire
                 else
                 {
                 }
+                // store the plugin corresponding to the plugin type (the type which plugin visualizes)
+                mapPluginType[parameterType].push_back(vizPlugin);
+
                 // call the updateData method
                 // NOTE cannot use non blocking calls because qt does not know how to handle the raw datatypes
                 // std::cout << "try updating item: " << demangledTypeName(item) << " " << parameterType.c_str() << std::endl;
