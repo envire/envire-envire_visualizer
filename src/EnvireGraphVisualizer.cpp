@@ -234,7 +234,7 @@ namespace envire
             transformationsToUpdate.clear();
             transformationsToUpdateMutex.unlock();
 
-            for (const auto updatePair : updateMap)
+            for (const auto &updatePair : updateMap)
             {
                 const FrameId &origin = updatePair.first.first;
                 const FrameId &target = updatePair.first.second;
