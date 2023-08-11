@@ -43,6 +43,8 @@
 #include <QTableView>
 #include <glog/logging.h>
 #include <QListWidget>
+#include <QDockWidget>
+#include <QFileDialog>
 #include <fstream>
 #include "envire_core/EnvireGraph2DStructurWidget.hpp"
 #include "ItemManipulatorWidget.hpp"
@@ -102,7 +104,11 @@ firstTimeDisplayingItems(true)
   treeViewSelectedFrame->setItemDelegateForRow(2, treeViewSelectedFrame->itemDelegate()); //the row delegate will take precedence over the column delegate
   listWidgetFrames->setSortingEnabled(true);
   tableViewItems->setModel(&currentItems);//tableView will not take ownership
+#if QT_VERSION < 0x050000
   tableViewItems->horizontalHeader()->setResizeMode(QHeaderView::Interactive);
+#else
+  tableViewItems->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+#endif
 
   
   statusBar = new QStatusBar();

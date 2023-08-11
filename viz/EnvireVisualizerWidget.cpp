@@ -93,6 +93,8 @@ void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& v
     }
 }
 
-//Macro that makes this plugin loadable in ruby, this is optional.
-VizkitQtPlugin(EnvireVisualizerWidget)
+namespace vizkit3d
+{
+    VizkitQtPluginImpl(EnvireVisualizerWidget)
+}
 
