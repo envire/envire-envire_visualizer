@@ -71,7 +71,7 @@ if(ROCK_QT_VERSION_5)
                  DEPS envire_visualizer_pcl_plugin-qt5
                       envire_visualizer_smurf_plugin-qt5
                       Qt5::Core Qt5::Gui
-                 DEPS_PKGCONFIG vizkit3d-qt5 envire_core envire_2D_structure_widget-qt5 vizkit3d_plugin_information
+                 DEPS_PKGCONFIG vizkit3d-qt5 envire_core envire_2D_structure_widget-qt5 vizkit3d_plugin_information-qt5
                  DEPS_PKGCONFIG base-lib)
 
     rock_library(envire_visualizer_interface-qt5
