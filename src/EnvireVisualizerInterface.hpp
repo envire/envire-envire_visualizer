@@ -14,7 +14,7 @@ class EnvireVisualizerInterface
 {
     EnvireVisualizerImpl* impl;
 public:
-    EnvireVisualizerInterface();
+    EnvireVisualizerInterface(bool auto_redraw = true);
     virtual ~EnvireVisualizerInterface();
     virtual void displayGraph(envire::core::EnvireGraph& graph, const std::string& base);
     virtual void redraw();

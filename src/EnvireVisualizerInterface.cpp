@@ -50,7 +50,7 @@ class EnvireVisualizerImpl: public EnvireVisualizerInterfaceCallbackReceiver
     EnvireGraph* graph;
     boost::shared_ptr<ItemCallbackSubscriber> subscriber;
 public:
-    EnvireVisualizerImpl() : graph(0)
+    EnvireVisualizerImpl(bool auto_redraw) : graph(0), auto_redraw(auto_redraw)
     {
         qRegisterMetaType<envire::core::ItemBase::Ptr>("envire::core::ItemBase::Ptr");
     }
@@ -103,7 +103,9 @@ public:
     }
 
     virtual void edgeModified(const envire::core::EdgeModifiedEvent& e){
-        redraw();
+        if (auto_redraw) {
+            redraw();
+        }
     }
 
     void updateViz(ItemBase& item){
@@ -117,10 +119,13 @@ public:
         return window;
     }
 
+private:
+    bool auto_redraw;
+
 };
 
 
-EnvireVisualizerInterface::EnvireVisualizerInterface() : impl(new EnvireVisualizerImpl)
+EnvireVisualizerInterface::EnvireVisualizerInterface(bool auto_redraw) : impl(new EnvireVisualizerImpl(auto_redraw))
 {
 }
 
