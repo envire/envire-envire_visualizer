@@ -1,4 +1,7 @@
 find_package(PCL 1.8 REQUIRED COMPONENTS common)
+IF("${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}" VERSION_LESS 1.14)
+    SET(PCL_VERSION_SUFFIX "-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}")
+ENDIF()
 
 if(ROCK_QT_VERSION_4)
     rock_library(envire_visualizer_pcl_plugin
@@ -13,9 +16,9 @@ if(ROCK_QT_VERSION_4)
                  DEPS_PKGCONFIG envire_core
                                 envire_pcl
                                 base-lib
-                                pcl_common-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}
-                                pcl_io-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}
-                                pcl_registration-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}
+                                pcl_common${PCL_VERSION_SUFFIX}
+                                pcl_io${PCL_VERSION_SUFFIX}
+                                pcl_registration${PCL_VERSION_SUFFIX}
     )
 endif(ROCK_QT_VERSION_4)
 
@@ -32,8 +35,8 @@ if(ROCK_QT_VERSION_5)
                  DEPS_PKGCONFIG envire_core
                                 envire_pcl
                                 base-lib
-                                pcl_common-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}
-                                pcl_io-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}
-                                pcl_registration-${PCL_VERSION_MAJOR}.${PCL_VERSION_MINOR}
+                                pcl_common${PCL_VERSION_SUFFIX}
+                                pcl_io${PCL_VERSION_SUFFIX}
+                                pcl_registration${PCL_VERSION_SUFFIX}
     )
 endif(ROCK_QT_VERSION_5)
