@@ -300,6 +300,8 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
                               Q_ARG(QString, qFrame));
       
       itemVisuals[item->getID()] = vizPlugin;
+      visualItems[vizPlugin] = item;
+
       LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
 
     }else{

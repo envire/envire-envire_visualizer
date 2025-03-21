@@ -90,7 +90,19 @@ public:
     return itemVisuals[uuid];
   }
 
-  
+  envire::core::ItemBase::Ptr getItemForVisualizer(vizkit3d::VizPluginBase* visualizer) {
+    return visualItems[visualizer];
+  }
+
+  std::vector<vizkit3d::VizPluginBase*> getVizPlugins() {
+    std::vector<vizkit3d::VizPluginBase*> result;
+    result.reserve(itemVisuals.size());
+    for (const auto& plugin : itemVisuals) {
+      result.push_back(plugin.second);
+    }
+    return result;
+  }
+
 public slots:
     /**Get all transformation changes from the graph and redraw the graph.
      * @note expensive, don't call too often.
@@ -151,12 +163,14 @@ private:
   std::pair<QQuaternion, QVector3D> convertTransform(const envire::core::Transform& tf) const;
   
   using ItemVisualMap = std::unordered_map<boost::uuids::uuid, vizkit3d::VizPluginBase*, boost::hash<boost::uuids::uuid>>;
+  using VisualItemMap = std::unordered_map<vizkit3d::VizPluginBase*, envire::core::ItemBase::Ptr>;
 
   std::shared_ptr<envire::core::EnvireGraph> graph; /**< the graph that is visualized*/
   envire::core::TreeView tree;
   vizkit3d::Vizkit3DWidget* widget; /**< Is used to display the graph */
   std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos; /**< meta-data needed to figure out which plugins to load*/
   ItemVisualMap itemVisuals; /**<Map of all items that are currently visualized and the plugin visualizing them*/
+  VisualItemMap visualItems; /**<Map to the the item if the visiual is known */
   QSet<QString> frameNames; //contains the names of all frames in the current tree
   bool initialized;
   envire::core::FrameId rootId;
