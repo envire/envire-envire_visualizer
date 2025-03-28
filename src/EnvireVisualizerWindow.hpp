@@ -93,7 +93,9 @@ public:
         return visualzier;
     }
   
-  
+    /**selects the frame named @p name in the 2d listview and 3d window */
+    void selectFrame(const QString& name);
+
 public slots:
     void addFrame();
     /**Remove the currently selected frame (if any) */
@@ -150,7 +152,7 @@ private slots:
     void itemClicked(const QModelIndex & index);
   
     void showStatistics();
-    
+
 signals:
     /**emitted when the widget is closed */
     void widgetClosed();
@@ -162,9 +164,6 @@ private:
     /** @param finished if false, the movement is still ongoing, if true the movement is done */
     void internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
                            bool finished);
-  
-    /**selects the frame named @p name in the 2d listview and 3d window */
-    void selectFrame(const QString& name);
     
 
     std::shared_ptr<Ui::MainWindow> window;
