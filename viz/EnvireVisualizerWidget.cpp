@@ -75,7 +75,12 @@ void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& v
             p->graph.reset(new EnvireGraph);
             p->pluginInfos.reset(new Vizkit3dPluginInformation(getWidget()));
             p->visualizer.reset(new EnvireGraphVisualizer(getWidget(), p->pluginInfos));
+
+            const FrameId root = p->graph->getFrameId(*(p->graph->getVertices().first));
+            p->visualizer->init(p->graph, root);
+            p->visualizer->redraw();
             p->initialized = true;
+            return;
         }
     }
     
@@ -87,8 +92,10 @@ void EnvireVisualizerWidget::updateDataIntern(envire::core::EnvireGraph const& v
             const FrameId root = p->graph->getFrameId(*(p->graph->getVertices().first));
             //FIXME the user should be able to choose the root node
             //FIXME reinitializing every time is probably really expensive
-            p->visualizer->init(p->graph, root);
-            p->visualizer->redraw();
+            if (p->visualizer->transformsChanged()) {
+                p->visualizer->init(p->graph, root);
+                p->visualizer->redraw();
+            }
         }
     }
 }

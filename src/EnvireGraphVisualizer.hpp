@@ -85,6 +85,9 @@ public:
   /**Returns a reference to the TreeView that is currently visualized. */
   const envire::core::TreeView& getTree() const;
 
+  bool transformsChanged(){
+      return tfChanged;
+  }
 
   vizkit3d::VizPluginBase* getVizPluginForItem(const boost::uuids::uuid &uuid) {
     return itemVisuals[uuid];
@@ -173,6 +176,7 @@ private:
   VisualItemMap visualItems; /**<Map to the the item if the visiual is known */
   QSet<QString> frameNames; //contains the names of all frames in the current tree
   bool initialized;
+  bool tfChanged;
   envire::core::FrameId rootId;
   
   std::mutex transformationsToUpdateMutex;
