@@ -85,6 +85,10 @@ public:
   /**Returns a reference to the TreeView that is currently visualized. */
   const envire::core::TreeView& getTree() const;
 
+  osg::Group* getRootNode() const {
+    return widget->getRootNode();
+  }
+
   bool transformsChanged(){
       return tfChanged;
   }
@@ -105,6 +109,28 @@ public:
     }
     return result;
   }
+
+  template<class PLUGINTYPE> void visitPlugins(std::function<void (PLUGINTYPE *plugin)> visitor) {
+      std::vector<vizkit3d::VizPluginBase*> plugins = getVizPlugins();
+      for (const auto& base : plugins) {
+          PLUGINTYPE* plugin = dynamic_cast<PLUGINTYPE*>(base);
+          if (plugin){
+              visitor(plugin);
+          }
+      }
+  }
+
+  template<class PLUGINTYPE> void visitPlugins(std::function<void (PLUGINTYPE *plugin, envire::core::ItemBase::Ptr itembase)> visitor) {
+      std::vector<vizkit3d::VizPluginBase*> plugins = getVizPlugins();
+      for (const auto& base : plugins) {
+          PLUGINTYPE* plugin = dynamic_cast<PLUGINTYPE*>(base);
+          envire::core::ItemBase::Ptr itembase = getItemForVisualizer(plugin);
+          if (plugin){
+              visitor(plugin, itembase);
+          }
+      }
+  }
+
 
 public slots:
     /**Get all transformation changes from the graph and redraw the graph.
