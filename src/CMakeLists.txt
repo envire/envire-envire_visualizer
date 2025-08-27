@@ -1,3 +1,6 @@
+
+include(RockQt)
+
 add_subdirectory(plugins)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainwindow.h
 
@@ -39,48 +42,33 @@ set(ENVIRE_VISUALIZER_SOURCES
                      ItemManipulatorWidget.cpp
     )
 
-if(ROCK_QT_VERSION_4)
-    rock_library(envire_visualizer
-                 MOC     ${ENVIRE_VISUALIZER_MOC}
-                 UI      ${ENVIRE_VISUALIZER_UI}
-                 HEADERS ${ENVIRE_VISUALIZER_HEADERS}
-                 SOURCES ${ENVIRE_VISUALIZER_SOURCES}
-                 DEPS envire_visualizer_pcl_plugin
-                      envire_visualizer_smurf_plugin
-                      Qt4::QtCore
-                 DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information
-                 DEPS_PKGCONFIG base-lib)
+rock_qt_library(
+                TARGETPREFIX envire_visualizer
+                QT4_SUFFIX ""
+                MISSINGQTDEPS_NOBUILD
+                MOC     ${ENVIRE_VISUALIZER_MOC}
+                UI      ${ENVIRE_VISUALIZER_UI}
+                HEADERS ${ENVIRE_VISUALIZER_HEADERS}
+                SOURCES ${ENVIRE_VISUALIZER_SOURCES}
+                DEPS_QT
+                    envire_visualizer_pcl_plugin
+                    envire_visualizer_smurf_plugin
+                DEPS_PKGCONFIG_QT vizkit3d envire_2D_structure_widget vizkit3d_plugin_information
+                DEPS_PKGCONFIG envire_core base-lib)
 
-    rock_library(envire_visualizer_interface
-                 HEADERS EnvireVisualizerInterface.hpp
-                 SOURCES EnvireVisualizerInterface.cpp
-                 LIBS envire_visualizer)
+rock_qt_library(
+                TARGETPREFIX envire_visualizer_interface
+                QT4_SUFFIX ""
+                MISSINGQTDEPS_NOBUILD
+                HEADERS EnvireVisualizerInterface.hpp
+                SOURCES EnvireVisualizerInterface.cpp
+                LIBS_QT envire_visualizer)
 
-    rock_executable(envire_visualizer_bin
-                    SOURCES VisualizerMain.cpp
-                    DEPS envire_visualizer
-    )
-endif(ROCK_QT_VERSION_4)
-
-if(ROCK_QT_VERSION_5)
-    rock_library(envire_visualizer-qt5
-                 MOC5    ${ENVIRE_VISUALIZER_MOC}
-                 UI5     ${ENVIRE_VISUALIZER_UI}
-                 HEADERS ${ENVIRE_VISUALIZER_HEADERS}
-                 SOURCES ${ENVIRE_VISUALIZER_SOURCES}
-                 DEPS envire_visualizer_pcl_plugin-qt5
-                      envire_visualizer_smurf_plugin-qt5
-                      Qt5::Core Qt5::Gui
-                 DEPS_PKGCONFIG vizkit3d-qt5 envire_core envire_2D_structure_widget-qt5 vizkit3d_plugin_information-qt5
-                 DEPS_PKGCONFIG base-lib)
-
-    rock_library(envire_visualizer_interface-qt5
-                 HEADERS EnvireVisualizerInterface.hpp
-                 SOURCES EnvireVisualizerInterface.cpp
-                 LIBS envire_visualizer-qt5)
-
-    rock_executable(envire_visualizer-qt5_bin
-                    SOURCES VisualizerMain.cpp
-                    DEPS envire_visualizer-qt5
-    )
-endif(ROCK_QT_VERSION_5)
+rock_qt_executable(
+                TARGET_QT4 envire_visualizer_bin
+                TARGET_QT5 envire_visualizer-qt5_bin
+                QT4_SUFFIX ""
+                MISSINGQTDEPS_NOBUILD
+                SOURCES VisualizerMain.cpp
+                DEPS_QT envire_visualizer
+)
