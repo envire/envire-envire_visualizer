@@ -3,10 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: envire_visualizer-viz
+Name: @TARGET_NAME@
 Description: vizKit plugin for the envire_visualizer library
-Requires: envire_visualizer @PKGCONFIG_DEPS@
+Requires: envire_visualizer-qt5 @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lenvire_visualizer-viz
+Libs: -L${libdir} -l@TARGET_NAME@
 Cflags: -I${includedir}
 

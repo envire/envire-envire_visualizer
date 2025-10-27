@@ -3,10 +3,10 @@ exec_prefix=@CMAKE_INSTALL_PREFIX@
 libdir=${prefix}/lib
 includedir=${prefix}/include
 
-Name: envire_visualizer
+Name: @TARGET_NAME@
 Description: envire visualizer
 Requires: Qt5Core Qt5Gui envire_core @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
-Libs: -L${libdir} -lenvire_visualizer_interface-qt5
+Libs: -L${libdir} -l@TARGET_NAME@
 Cflags: -I${includedir}
 
