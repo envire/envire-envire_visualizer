@@ -48,7 +48,7 @@ EnvireGraphVisualizer::EnvireGraphVisualizer(std::shared_ptr<envire::core::Envir
                                              const FrameId& rootNode,
                                              std::shared_ptr<vizkit3d::Vizkit3dPluginInformation> pluginInfos) :
     GraphEventDispatcher(graph.get()), graph(graph), widget(widget), pluginInfos(pluginInfos),
-    initialized(false)
+    initialized(false), tfChanged(false)
 { 
     init(graph, rootNode);
 }
@@ -88,6 +88,7 @@ void EnvireGraphVisualizer::init(std::shared_ptr< EnvireGraph > graph, const Fra
     graph->getTree(rootNode, true, &tree);
     
     initialized = true;
+    tfChanged = false;
 }
 
 
@@ -107,6 +108,7 @@ void EnvireGraphVisualizer::edgeAddedToTree(vertex_descriptor origin, vertex_des
   addFrameName(QString::fromStdString(graph->getFrameId(target)));
   
   LOG(INFO) << "Added edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
+  tfChanged = true;
 }
 
 void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, const vertex_descriptor target)
@@ -118,6 +120,7 @@ void EnvireGraphVisualizer::edgeRemovedFromTree(const vertex_descriptor origin, 
   removeFrameName(QString::fromStdString(graph->getFrameId(target)));
   
   LOG(INFO) << "Removed edge " << graph->getFrameId(origin) << " -- " << graph->getFrameId(target);
+  tfChanged = true;
 }
 
 void EnvireGraphVisualizer::itemAdded(const envire::core::ItemAddedEvent& e)
@@ -213,6 +216,7 @@ void EnvireGraphVisualizer::edgeModified(const EdgeModifiedEvent& e)
   {
     setTransformation(origin, target);
   }
+  tfChanged = true;
 }
 
 
@@ -230,6 +234,7 @@ void EnvireGraphVisualizer::setTransformation(const FrameId& origin, const Frame
     //this is done because some users make up to 22k transformation changes and
     //direct redrawing is simply not possible with those numbers
     transformationsToUpdate[std::make_pair(origin, target)] = graph->getTransform(origin, target);
+    tfChanged = true;
 }
 
 
@@ -300,6 +305,8 @@ void EnvireGraphVisualizer::updateVisual(envire::core::ItemBase::Ptr item){
                               Q_ARG(QString, qFrame));
       
       itemVisuals[item->getID()] = vizPlugin;
+      visualItems[vizPlugin] = item;
+
       LOG(INFO) << "Added item " << item->getIDString() << " using vizkit plugin " << info.libName.toStdString();
 
     }else{

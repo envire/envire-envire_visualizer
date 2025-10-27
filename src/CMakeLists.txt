@@ -1,7 +1,13 @@
-qt4_wrap_ui(SOURCES_UI_H mainwindow.ui addtransformdialog.ui additemdialog.ui)
+
+include(RockQt)
+
 add_subdirectory(plugins)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}) #to be able to include ui_mainwindow.h
-rock_library(envire_visualizer 
+
+rock_qt_library(
+             TARGETPREFIX envire_visualizer
+             QT4_SUFFIX ""
+             MISSINGQTDEPS_NOBUILD
              MOC     EnvireVisualizerWindow.hpp
                      EnvireGraphVisualizer.hpp
                      TransformModel.hpp
@@ -10,8 +16,7 @@ rock_library(envire_visualizer
                      AddItemDialog.hpp
                      ItemTableModel.hpp
                      ItemManipulatorWidget.hpp
-             HEADERS 
-                     Helpers.hpp
+             HEADERS Helpers.hpp
                      EnvireVisualizerWindow.hpp
                      EnvireGraphVisualizer.hpp
                      TransformModel.hpp
@@ -21,7 +26,6 @@ rock_library(envire_visualizer
                      ItemTableModel.hpp
                      plugins/ItemFactoryInterface.hpp
                      ItemManipulatorWidget.hpp
-                     ${SOURCES_UI_H}
              SOURCES EnvireGraphVisualizer.cpp
                      TransformModel.cpp
                      DoubleSpinboxItemDelegate.cpp
@@ -30,23 +34,27 @@ rock_library(envire_visualizer
                      ItemTableModel.cpp
                      EnvireVisualizerWindow.cpp
                      ItemManipulatorWidget.cpp
-                     ${SOURCES_MOC}
-                     #add ui files to create a dependency and regen if the ui changes
-                     mainwindow.ui 
+             UI      mainwindow.ui
                      addtransformdialog.ui
                      additemdialog.ui
-             DEPS envire_visualizer_pcl_plugin
-                  envire_visualizer_smurf_plugin
-             DEPS_PKGCONFIG vizkit3d envire_core envire_2D_structure_widget vizkit3d_plugin_information QtCore
-             DEPS_PKGCONFIG base-lib)
+             DEPS_QT envire_visualizer_pcl_plugin
+                     envire_visualizer_smurf_plugin
+             DEPS_PKGCONFIG_QT vizkit3d envire_2D_structure_widget vizkit3d_plugin_information
+             DEPS_PKGCONFIG envire_core base-lib)
 
-rock_library(envire_visualizer_interface
-             HEADERS EnvireVisualizerInterface.hpp
-             SOURCES EnvireVisualizerInterface.cpp
-             LIBS envire_visualizer)
+rock_qt_library(
+                TARGETPREFIX envire_visualizer_interface
+                QT4_SUFFIX ""
+                MISSINGQTDEPS_NOBUILD
+                HEADERS EnvireVisualizerInterface.hpp
+                SOURCES EnvireVisualizerInterface.cpp
+                LIBS_QT envire_visualizer)
 
-rock_executable(envire_visualizer_bin
+rock_qt_executable(
+                TARGET_QT4 envire_visualizer_bin
+                TARGET_QT5 envire_visualizer-qt5_bin
+                QT4_SUFFIX ""
+                MISSINGQTDEPS_NOBUILD
                 SOURCES VisualizerMain.cpp
-                DEPS envire_visualizer
+                DEPS_QT envire_visualizer
 )
-

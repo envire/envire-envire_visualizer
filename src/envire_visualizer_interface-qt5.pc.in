@@ -5,7 +5,7 @@ includedir=${prefix}/include
 
 Name: @TARGET_NAME@
 Description: envire visualizer
-Requires: QtCore QtGui envire_core @PKGCONFIG_DEPS@
+Requires: Qt5Core Qt5Gui envire_core @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -l@TARGET_NAME@
 Cflags: -I${includedir}

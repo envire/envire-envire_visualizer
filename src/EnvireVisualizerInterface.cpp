@@ -119,6 +119,11 @@ public:
         return window;
     }
 
+    std::shared_ptr<EnvireGraphVisualizer> getGraphVisualizer() {
+        return window.getVisualizer();
+    }
+    
+
 private:
     bool auto_redraw;
 
@@ -152,4 +157,8 @@ void EnvireVisualizerInterface::show()
 
 EnvireVisualizerWindow& EnvireVisualizerInterface::getEnvireVisualizerWindow(){
     return impl->getEnvireVisualizerWindow();
+}
+
+std::shared_ptr<EnvireGraphVisualizer> EnvireVisualizerInterface::getGraphVisualizer() {
+    return impl->getGraphVisualizer();
 }

@@ -4,8 +4,8 @@ libdir=${prefix}/lib
 includedir=${prefix}/include
 
 Name: @TARGET_NAME@
-Description: envire visualizer
-Requires: QtCore QtGui envire_core @PKGCONFIG_DEPS@
+Description: vizKit plugin for the envire_visualizer library
+Requires: envire_visualizer-qt5 @PKGCONFIG_DEPS@
 Version: @PROJECT_VERSION@
 Libs: -L${libdir} -l@TARGET_NAME@
 Cflags: -I${includedir}

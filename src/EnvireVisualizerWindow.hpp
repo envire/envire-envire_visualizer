@@ -93,7 +93,9 @@ public:
         return visualzier;
     }
   
-  
+    /**selects the frame named @p name in the 2d listview and 3d window */
+    void selectFrame(const QString& name);
+
 public slots:
     void addFrame();
     /**Remove the currently selected frame (if any) */
@@ -116,6 +118,14 @@ public slots:
     * @note Only call if you know that the graph is not modifed at the same time.
     * @note Is thread safe in a sense that no two threads can call redraw at the same time*/
     void redraw();
+
+    void removeItemManipulatorDock();
+
+    void removeItemDock();
+
+    void removeSelectedFrameDock();
+
+    void removeFramesDock() ;
     
 private slots:
     void framePicked(const QString&);
@@ -142,7 +152,7 @@ private slots:
     void itemClicked(const QModelIndex & index);
   
     void showStatistics();
-    
+
 signals:
     /**emitted when the widget is closed */
     void widgetClosed();
@@ -154,9 +164,6 @@ private:
     /** @param finished if false, the movement is still ongoing, if true the movement is done */
     void internalFrameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot,
                            bool finished);
-  
-    /**selects the frame named @p name in the 2d listview and 3d window */
-    void selectFrame(const QString& name);
     
 
     std::shared_ptr<Ui::MainWindow> window;
@@ -178,6 +185,11 @@ private:
     QTreeView* treeViewSelectedFrame;
     QListWidget* listWidgetFrames;
     QStatusBar* statusBar;
+
+    QDockWidget* itemDock;
+    QDockWidget* itemManipulatorDock;
+    QDockWidget* selectedFrameDock;
+    QDockWidget* framesDock;
 
     std::mutex redrawMutex;
   

@@ -163,7 +163,11 @@ void PclItemManipulator::alignButtonClicked(bool checked)
   ::pcl::GeneralizedIterativeClosestPoint<::pcl::PointXYZ, ::pcl::PointXYZ> icp;
   // TODO make max correspondence distance configurable
   icp.setMaxCorrespondenceDistance(1.0);
+#if PCL_VERSION_COMPARE(<, 1, 11, 0)
   icp.setInputCloud(selectedPcl.makeShared());
+#else
+  icp.setInputSource(selectedPcl.makeShared());
+#endif
   icp.setInputTarget(otherPclTransformed);
 
   ::pcl::PointCloud<::pcl::PointXYZ> selectedAlignedToOther;

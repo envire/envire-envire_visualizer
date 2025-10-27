@@ -6,6 +6,7 @@ class EnvireVisualizerImpl;
 namespace envire{ 
     namespace viz{ 
         class EnvireVisualizerWindow;
+        class EnvireGraphVisualizer;
     }
 }
 
@@ -20,6 +21,7 @@ public:
     virtual void redraw();
     void show();
     envire::viz::EnvireVisualizerWindow& getEnvireVisualizerWindow();
+    std::shared_ptr<envire::viz::EnvireGraphVisualizer> getGraphVisualizer();
 };
 
 class EnvireVisualizerInterfaceCallbackReceiver{
