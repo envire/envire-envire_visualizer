@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 project(envire_visualizer VERSION 0.1)
 
 find_package(Rock)
