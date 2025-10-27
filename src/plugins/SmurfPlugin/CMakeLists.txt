@@ -1,5 +1,3 @@
-find_package(PCL 1.8 REQUIRED COMPONENTS common)
-
 rock_qt_library(
                 TARGETPREFIX envire_visualizer_smurf_plugin
                 QT4_SUFFIX ""
