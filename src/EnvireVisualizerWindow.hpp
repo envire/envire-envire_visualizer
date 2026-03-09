@@ -110,6 +110,11 @@ public slots:
     /**Display a file picker dialog and save the graph to the selected file */
     void storeGraph();
 
+    /**Subsequent calls to redraw() (graph part) is only really executed after this amount of milliseconds */
+    void setMinGraphRedrawTime(const size_t &milliseconds) {
+        minGraphRedrawTime = milliseconds;
+    }
+
     /**Is called whenever the user wants to move a frame in the ui using the dragger */
     void frameMoved(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
     void frameMoving(const QString& frame, const QVector3D& trans, const QQuaternion& rot);
@@ -194,6 +199,10 @@ private:
     std::mutex redrawMutex;
   
     std::chrono::system_clock::time_point lastStatisticTime;
+
+    size_t minGraphRedrawTime;
+    std::chrono::system_clock::time_point lastRedraw;
+
     size_t numUpdates;
     size_t totalNumUpdates;
     

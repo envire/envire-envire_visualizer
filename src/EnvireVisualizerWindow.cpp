@@ -58,7 +58,7 @@ namespace envire { namespace viz
   
 EnvireVisualizerWindow::EnvireVisualizerWindow(): QMainWindow(), GraphEventDispatcher(),
 window(new Ui::MainWindow()), rootFrame(""), ignoreEdgeModifiedEvent(false),
-firstTimeDisplayingItems(true)
+firstTimeDisplayingItems(true), minGraphRedrawTime(0)
 {
   numUpdates = 0;
   totalNumUpdates = 0;
@@ -154,17 +154,18 @@ void EnvireVisualizerWindow::redraw()
     {
         visualzier->redraw();
     }
-    
-    if(graph)
-    {
-        std::stringstream stream;
-        GraphDrawing::write(*graph, stream);
-        
-        const QString dotStr = QString::fromStdString(stream.str());
-        QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
-                            Q_ARG(QString, dotStr));  
+    if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now() - lastRedraw).count() >= minGraphRedrawTime) {
+      if(graph)
+      {
+          std::stringstream stream;
+          GraphDrawing::write(*graph, stream);
+
+          const QString dotStr = QString::fromStdString(stream.str());
+          QMetaObject::invokeMethod(view2D, "displayGraph", Qt::QueuedConnection,
+                              Q_ARG(QString, dotStr));
+      }
+      lastRedraw = std::chrono::system_clock::now();
     }
-    
     QMetaObject::invokeMethod(this, "showStatistics", Qt::QueuedConnection);  //redraw might be called from any thread
 }
 
