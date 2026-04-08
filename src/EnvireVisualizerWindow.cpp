@@ -326,15 +326,19 @@ void EnvireVisualizerWindow::selectFrame(const QString& name)
     //display corresponding Transform
     const vertex_descriptor selectedVertex = graph->getVertex(name.toStdString());
     
-    if(visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end())
+    bool vertex_not_found = (visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end());
+    if(vertex_not_found)
     {
       LOG(ERROR) << "vertex not in tree: " << name.toStdString();
     }
-    const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
-    Transform tf;
-    if(parentVertex != graph->null_vertex())//happens when the root node is selected
-      tf = graph->getTransform(parentVertex, selectedVertex);
-    updateDisplayedTransform(parentVertex, selectedVertex, tf.transform);
+    else
+    {
+      const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
+      Transform tf;
+      if(parentVertex != graph->null_vertex())//happens when the root node is selected
+        tf = graph->getTransform(parentVertex, selectedVertex);
+      updateDisplayedTransform(parentVertex, selectedVertex, tf.transform);
+    }
     
     //user should not be able to delete the root frame
     if(name == rootFrame)
@@ -393,17 +397,20 @@ void EnvireVisualizerWindow::transformChanged(const envire::core::Transform& new
 {
   const vertex_descriptor selectedVertex = graph->getVertex(selectedFrame.toStdString());
   
-  if(visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end())
+  bool vertex_not_found = (visualzier->getTree().tree.find(selectedVertex) == visualzier->getTree().tree.end());
+  if(vertex_not_found)
   {
     LOG(ERROR) << "vertex not in tree: " << selectedFrame.toStdString();
   }
-  
-  const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
-  const FrameId source = graph->getFrameId(parentVertex);
-  const FrameId target = selectedFrame.toStdString();
-  ignoreEdgeModifiedEvent = true;
-  graph->updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
-  ignoreEdgeModifiedEvent = false;
+  else
+  {
+    const vertex_descriptor parentVertex = visualzier->getTree().tree.at(selectedVertex).parent;
+    const FrameId source = graph->getFrameId(parentVertex);
+    const FrameId target = selectedFrame.toStdString();
+    ignoreEdgeModifiedEvent = true;
+    graph->updateTransform(source, target, newValue);//will trigger EdgeModifiedEvent
+    ignoreEdgeModifiedEvent = false;
+  }
 }
 
 void EnvireVisualizerWindow::edgeModified(const EdgeModifiedEvent& e)
