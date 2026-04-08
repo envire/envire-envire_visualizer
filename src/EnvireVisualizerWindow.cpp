@@ -122,11 +122,11 @@ firstTimeDisplayingItems(true), minGraphRedrawTime(0)
           this, SLOT(frameMoved(const QString&, const QVector3D&, const QQuaternion&)));          
   connect(vizkit3dWidget, SIGNAL(frameMoving(const QString&, const QVector3D&, const QQuaternion)),
           this, SLOT(frameMoving(const QString&, const QVector3D&, const QQuaternion&)));          
-  connect(window->actionRemove_Frame, SIGNAL(activated(void)), this, SLOT(removeFrame()));
-  connect(window->actionAdd_Frame, SIGNAL(activated(void)), this, SLOT(addFrame()));
-  connect(window->actionLoad_Graph, SIGNAL(activated(void)), this, SLOT(loadGraph()));
-  connect(window->actionSave_Graph, SIGNAL(activated(void)), this, SLOT(storeGraph()));
-  connect(window->actionAdd_Item, SIGNAL(activated(void)), this, SLOT(addItem()));
+  connect(window->actionRemove_Frame, SIGNAL(triggered(void)), this, SLOT(removeFrame()));
+  connect(window->actionAdd_Frame, SIGNAL(triggered(void)), this, SLOT(addFrame()));
+  connect(window->actionLoad_Graph, SIGNAL(triggered(void)), this, SLOT(loadGraph()));
+  connect(window->actionSave_Graph, SIGNAL(triggered(void)), this, SLOT(storeGraph()));
+  connect(window->actionAdd_Item, SIGNAL(triggered(void)), this, SLOT(addItem()));
   connect(listWidgetFrames, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
           this, SLOT(listWidgetItemChanged(QListWidgetItem*, QListWidgetItem*)));
   connect(&currentTransform, SIGNAL(transformChanged(const envire::core::Transform&)),
