@@ -89,6 +89,8 @@ public:
 
     vizkit3d::Vizkit3DWidget* getWidget() { return vizkit3dWidget; }
 
+    QListWidget* getListWidget() { return listWidgetFrames; }
+
     std::shared_ptr<EnvireGraphVisualizer> getVisualizer(){
         return visualzier;
     }
