@@ -386,6 +386,12 @@ void EnvireVisualizerWindow::frameNameRemoved(const QString& name)
 {
   QList<QListWidgetItem*> items = listWidgetFrames->findItems(name, Qt::MatchExactly);
   assert(items.size() == 1); //the frame ids are unique and should not be in the list more than once
+  //deleting the current item makes the list select a neighbour, which would call selectFrame()
+  //while the visualizer is still removing frames (neighbour might be gone already) -> unselect first
+  if(listWidgetFrames->currentItem() == items.first())
+    listWidgetFrames->setCurrentItem(nullptr);
+  if(name == selectedFrame)
+    selectedFrame = "";//otherwise we might try to unhighlight a no longer existing frame
   delete items.first(); //this will remove the item from the listWidget
 }
 
