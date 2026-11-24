@@ -41,6 +41,8 @@
 class QTableView;
 class QTreeView;
 class QListWidget;
+class QTabWidget;
+class QToolBar;
 
 namespace Ui 
 {
@@ -90,6 +92,15 @@ public:
     vizkit3d::Vizkit3DWidget* getWidget() { return vizkit3dWidget; }
 
     QListWidget* getListWidget() { return listWidgetFrames; }
+
+    /** the tabs of the views, "3D View" (getWidget()) and "2D View" (get2DViewWidget()) */
+    QTabWidget* getViewTabs();
+
+    /** the widget of the "2D View" tab */
+    QWidget* get2DViewWidget();
+
+    /** the window's toolbar: load and save the graph, add and remove frames, add items */
+    QToolBar* getToolBar();
 
     std::shared_ptr<EnvireGraphVisualizer> getVisualizer(){
         return visualzier;

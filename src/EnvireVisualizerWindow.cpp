@@ -552,6 +552,21 @@ void EnvireVisualizerWindow::frameMoving(const QString& frame, const QVector3D& 
   internalFrameMoving(frame, trans, rot, false);
 }
 
+QTabWidget* EnvireVisualizerWindow::getViewTabs()
+{
+  return window->tabWidget;
+}
+
+QWidget* EnvireVisualizerWindow::get2DViewWidget()
+{
+  return view2D;
+}
+
+QToolBar* EnvireVisualizerWindow::getToolBar()
+{
+  return window->toolBar;
+}
+
 std::shared_ptr<EnvireGraph> EnvireVisualizerWindow::getGraph() const
 {
   return graph;
